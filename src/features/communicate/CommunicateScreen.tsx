@@ -175,28 +175,38 @@ export default function CommunicateScreen() {
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
-    utterance.rate = 0.9; // Slightly slower for better clarity
+    utterance.rate = 0.85; // Slightly slower for better clarity
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
     
     const voices = window.speechSynthesis.getVoices();
+    // Filter for Portuguese voices
     const ptVoices = voices.filter(v => v.lang.includes('pt'));
     
     let selectedVoice = null;
     
     if (voiceType === 'male') {
+      // Try to find a good male voice
       selectedVoice = ptVoices.find(v => 
-        v.name.toLowerCase().includes('male') || 
-        v.name.toLowerCase().includes('daniel') || 
-        v.name.toLowerCase().includes('antonio') ||
-        v.name.toLowerCase().includes('helio')
-      );
+        (v.name.toLowerCase().includes('male') || 
+         v.name.toLowerCase().includes('daniel') || 
+         v.name.toLowerCase().includes('antonio') ||
+         v.name.toLowerCase().includes('helio')) &&
+        !v.name.toLowerCase().includes('google') // Sometimes system voices are better, but let's try
+      ) || ptVoices.find(v => v.name.toLowerCase().includes('male'));
     } else if (voiceType === 'female') {
+      // Try to find a good female voice, preferring Google voices which are usually higher quality
       selectedVoice = ptVoices.find(v => 
+        v.name.toLowerCase().includes('google português do brasil')
+      ) || ptVoices.find(v => 
         v.name.toLowerCase().includes('female') || 
         v.name.toLowerCase().includes('maria') || 
         v.name.toLowerCase().includes('luciana') ||
-        v.name.toLowerCase().includes('victoria') ||
-        v.name.toLowerCase().includes('google português do brasil')
+        v.name.toLowerCase().includes('victoria')
       );
+    } else {
+      // Neutral - just take a high quality one
+      selectedVoice = ptVoices.find(v => v.name.toLowerCase().includes('google')) || ptVoices[0];
     }
     
     if (!selectedVoice && ptVoices.length > 0) {
@@ -207,7 +217,11 @@ export default function CommunicateScreen() {
       utterance.voice = selectedVoice;
     }
 
-    window.speechSynthesis.speak(utterance);
+    // Workaround for some browsers where speech breaks if it's too long or starts too fast
+    setTimeout(() => {
+      window.speechSynthesis.speak(utterance);
+    }, 50);
+    
     showToast('Falando...');
   };
 
@@ -269,14 +283,15 @@ export default function CommunicateScreen() {
   };
 
   const IconSelector = ({ selected, onSelect }: { selected: string, onSelect: (name: string) => void }) => (
-    <div className="space-y-2">
-      <p className="text-xs font-medium text-[#6B7280] uppercase tracking-wider">Escolha um ícone</p>
-      <div className="grid grid-cols-6 gap-2 p-3 bg-gray-50 rounded-xl max-h-40 overflow-y-auto">
+    <div className="space-y-3">
+      <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest ml-1">Escolha um ícone</p>
+      <div className="grid grid-cols-5 gap-2 p-4 bg-gray-50 rounded-2xl max-h-48 overflow-y-auto border border-gray-100">
         {Object.keys(ICON_LIST).map((name) => (
           <button
             key={name}
+            type="button"
             onClick={(e) => { e.stopPropagation(); onSelect(name); }}
-            className={`p-2 rounded-lg flex items-center justify-center transition-colors ${selected === name ? 'bg-[#4A90E2] text-white' : 'bg-white text-gray-400 hover:bg-gray-100'}`}
+            className={`aspect-square rounded-xl flex items-center justify-center transition-all shadow-sm ${selected === name ? 'bg-[#4A90E2] text-white scale-105' : 'bg-white text-[#4B5563] hover:bg-gray-100'}`}
           >
             <IconRenderer name={name} className="w-5 h-5" />
           </button>
@@ -334,17 +349,20 @@ export default function CommunicateScreen() {
                 className={`w-full p-6 rounded-2xl bg-white card-shadow flex flex-col items-center text-center space-y-4 border transition-all ${editingId === action.id ? 'border-[#4A90E2] ring-1 ring-[#4A90E2]10' : 'border-transparent hover:border-gray-100'}`}
               >
                 {editingId === action.id ? (
-                  <div className="w-full space-y-4">
-                    <input 
-                      className="w-full p-1 border-b border-gray-200 outline-none font-medium text-sm text-center bg-transparent"
-                      value={newLabel}
-                      onChange={(e) => setNewLabel(e.target.value)}
-                      autoFocus
-                    />
+                  <div className="w-full space-y-6">
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest ml-1 text-left">Texto do botão</p>
+                      <input 
+                        className="w-full p-3 bg-gray-50 rounded-xl outline-none font-medium text-sm text-[#1F2937] border border-transparent focus:border-[#4A90E2]20 transition-all"
+                        value={newLabel}
+                        onChange={(e) => setNewLabel(e.target.value)}
+                        autoFocus
+                      />
+                    </div>
                     <IconSelector selected={newIcon} onSelect={setNewIcon} />
-                    <div className="flex space-x-2">
-                      <button onClick={saveEdit} className="flex-1 py-2.5 bg-[#4A90E2] text-white rounded-xl text-[10px] font-bold uppercase tracking-wider">Salvar</button>
-                      <button onClick={() => { resetForm(); setIsEditingQuick(false); }} className="flex-1 py-2.5 bg-gray-100 text-gray-500 rounded-xl text-[10px] font-bold uppercase tracking-wider">Sair</button>
+                    <div className="flex space-x-2 pt-2">
+                      <button onClick={saveEdit} className="flex-1 py-3 bg-[#4A90E2] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md active:scale-95 transition-all">Salvar</button>
+                      <button onClick={() => { resetForm(); setIsEditingQuick(false); }} className="flex-1 py-3 bg-gray-100 text-[#6B7280] rounded-xl text-xs font-bold uppercase tracking-wider active:scale-95 transition-all">Sair</button>
                     </div>
                   </div>
                 ) : (
@@ -431,7 +449,7 @@ export default function CommunicateScreen() {
                   )}
                 </div>
 
-                {!phrase.isLocked && (
+                {(!phrase.isLocked || isPremium) && (
                   <div className="flex items-center space-x-2 ml-4">
                     {editingId === phrase.id && !isEditingQuick ? (
                       <>
@@ -440,8 +458,10 @@ export default function CommunicateScreen() {
                       </>
                     ) : (
                       <>
-                        <button onClick={(e) => startEditing(phrase, e)} className="p-2 text-gray-200 hover:text-[#4A90E2] hover:bg-blue-50 rounded-full transition-all opacity-0 group-hover:opacity-100"><Edit2 className="w-4 h-4" /></button>
-                        <button onClick={(e) => deletePhrase(phrase.id, e)} className="p-2 text-gray-200 hover:text-red-400 hover:bg-red-50 rounded-full transition-all opacity-0 group-hover:opacity-100"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={(e) => startEditing(phrase, e)} className="p-2 text-gray-300 hover:text-[#4A90E2] hover:bg-blue-50 rounded-full transition-all opacity-0 group-hover:opacity-100"><Edit2 className="w-4 h-4" /></button>
+                        {!phrase.isLocked && (
+                          <button onClick={(e) => deletePhrase(phrase.id, e)} className="p-2 text-gray-300 hover:text-red-400 hover:bg-red-50 rounded-full transition-all opacity-0 group-hover:opacity-100"><Trash2 className="w-4 h-4" /></button>
+                        )}
                       </>
                     )}
                   </div>
