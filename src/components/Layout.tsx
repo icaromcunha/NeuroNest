@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import { motion } from 'motion/react';
 import { colors } from '../theme/colors';
 
 interface LayoutProps {
@@ -11,15 +10,15 @@ interface LayoutProps {
 export default function Layout({ children, title, onBack }: LayoutProps) {
   return (
     <div 
-      className="min-h-screen flex flex-col mx-auto max-w-md shadow-xl"
+      className="min-h-screen flex flex-col mx-auto w-full max-w-md shadow-xl relative"
       style={{ backgroundColor: colors.background, color: colors.text, fontFamily: 'sans-serif' }}
     >
       {title && (
-        <header className="p-6 flex items-center border-b border-gray-200 bg-white">
+        <header className="p-6 flex items-center border-b border-gray-200 bg-white sticky top-0 z-10">
           {onBack && (
             <button 
               onClick={onBack}
-              className="mr-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+              className="mr-4 p-3 rounded-full hover:bg-gray-100 transition-colors"
               aria-label="Voltar"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -30,14 +29,10 @@ export default function Layout({ children, title, onBack }: LayoutProps) {
           <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
         </header>
       )}
-      <main className="flex-1 p-6 overflow-y-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-        >
+      <main className="flex-1 p-6 overflow-y-auto pb-20">
+        <div className="w-full">
           {children}
-        </motion.div>
+        </div>
       </main>
     </div>
   );

@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastProvider } from './components/Toast';
 import HomeScreen from './features/home/HomeScreen';
 import PauseScreen from './features/pause/PauseScreen';
 import PauseDetailScreen from './features/pause/PauseDetailScreen';
@@ -9,16 +10,18 @@ import PaywallScreen from './features/paywall/PaywallScreen';
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomeScreen />} />
-        <Route path="/pause" element={<PauseScreen />} />
-        <Route path="/pause/:state" element={<PauseDetailScreen />} />
-        <Route path="/communicate" element={<CommunicateScreen />} />
-        <Route path="/routine" element={<RoutineScreen />} />
-        <Route path="/library" element={<LibraryScreen />} />
-        <Route path="/paywall" element={<PaywallScreen />} />
-      </Routes>
-    </Router>
+    <ToastProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomeScreen />} />
+          <Route path="/pause" element={<PauseScreen />} />
+          <Route path="/pause/:state" element={<PauseDetailScreen />} />
+          <Route path="/communicate" element={<CommunicateScreen />} />
+          <Route path="/routine" element={<RoutineScreen />} />
+          <Route path="/library" element={<LibraryScreen />} />
+          <Route path="/paywall" element={<PaywallScreen />} />
+        </Routes>
+      </Router>
+    </ToastProvider>
   );
 }

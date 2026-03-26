@@ -1,10 +1,25 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { colors } from '../../theme/colors';
 import { PauseState } from '../../types';
+import { saveToStorage, loadFromStorage, STORAGE_KEYS } from '../../lib/storage';
 
 export default function PauseScreen() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const lastState = loadFromStorage(STORAGE_KEYS.LAST_PAUSE_STATE);
+    if (lastState) {
+      // Optional: highlight last state or auto-navigate
+      console.log('Last state was:', lastState);
+    }
+  }, []);
+
+  const handleNavigate = (state: PauseState) => {
+    saveToStorage(STORAGE_KEYS.LAST_PAUSE_STATE, state);
+    navigate(`/pause/${state}`);
+  };
 
   const options: { label: string; state: PauseState; color: string; desc: string }[] = [
     { label: 'Amarelo', state: 'AMARELO', color: colors.yellow, desc: 'Início de sobrecarga' },
@@ -20,8 +35,8 @@ export default function PauseScreen() {
         {options.map((opt) => (
           <button
             key={opt.state}
-            onClick={() => navigate(`/pause/${opt.state}`)}
-            className="w-full p-8 rounded-3xl flex flex-col items-center space-y-2 shadow-sm active:scale-95 transition-transform"
+            onClick={() => handleNavigate(opt.state)}
+            className="w-full p-8 rounded-3xl flex flex-col items-center space-y-2 shadow-sm active:opacity-70 transition-opacity"
             style={{ backgroundColor: opt.color, color: colors.text }}
           >
             <span className="text-2xl font-bold uppercase tracking-widest">{opt.label}</span>
