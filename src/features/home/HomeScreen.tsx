@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { colors } from '../../theme/colors';
-import { Heart, MessageCircle, Calendar, BookOpen, Sparkles } from 'lucide-react';
+import { PauseCircle, MessageCircle, Calendar, BookOpen, Sparkles } from 'lucide-react';
 import { isUserPremium } from '../../utils/premium';
 
 export default function HomeScreen() {
@@ -10,85 +10,85 @@ export default function HomeScreen() {
 
   const mainActions = [
     { 
-      label: 'Pausar', 
+      label: 'Pausa rápida', 
       description: 'Respire e acalme-se',
       path: '/pause', 
       color: colors.primary,
-      icon: <Heart className="w-8 h-8" />
+      icon: <PauseCircle className="w-6 h-6" />
     },
     { 
-      label: 'Comunicar', 
+      label: 'Me expressar', 
       description: 'Diga o que você precisa',
       path: '/communicate', 
       color: colors.secondary,
-      icon: <MessageCircle className="w-8 h-8" />
+      icon: <MessageCircle className="w-6 h-6" />
     },
     { 
-      label: 'Rotina', 
+      label: 'Meu dia', 
       description: 'Veja o que vem agora',
       path: '/routine', 
-      color: colors.alert,
-      icon: <Calendar className="w-8 h-8" />
+      color: colors.primary,
+      icon: <Calendar className="w-6 h-6" />
     },
   ];
 
   return (
-    <Layout hideHeader>
-      <div className="py-8 space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-[#2C3E50]">Olá,</h1>
-          <p className="text-xl text-[#7F8C8D]">Vamos ter um dia calmo hoje?</p>
+    <Layout>
+      <div className="py-4 space-y-10">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-medium text-[#1F2937]">Olá,</h1>
+          <p className="text-lg text-[#6B7280]">Vamos ter um dia calmo hoje?</p>
         </div>
 
-        <div className="grid gap-4">
+        <div className="grid gap-5">
           {mainActions.map((action) => (
             <button
               key={action.label}
               onClick={() => navigate(action.path)}
-              className="w-full p-6 rounded-[24px] bg-white card-shadow flex items-center text-left space-x-6 active:scale-[0.98] transition-all border border-transparent hover:border-[#EBF0F5]"
+              className="w-full p-6 rounded-xl bg-white card-shadow flex items-center text-left space-x-5 border border-transparent hover:border-gray-100"
             >
               <div 
-                className="p-4 rounded-2xl"
-                style={{ backgroundColor: `${action.color}20`, color: action.color }}
+                className="p-3.5 rounded-xl"
+                style={{ backgroundColor: `${action.color}10`, color: action.color }}
               >
                 {action.icon}
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-[#2C3E50]">{action.label}</h2>
-                <p className="text-[#7F8C8D]">{action.description}</p>
+                <h2 className="text-lg font-medium text-[#1F2937]">{action.label}</h2>
+                <p className="text-sm text-[#6B7280]">{action.description}</p>
               </div>
             </button>
           ))}
         </div>
 
         {!isPremium && (
-          <div className="pt-4">
+          <div className="pt-2">
             <button
               onClick={() => navigate('/paywall')}
-              className="w-full p-6 bg-gradient-to-r from-[#5DADE2] to-[#76D7C4] rounded-[32px] flex items-center justify-between text-white shadow-lg active:scale-[0.98] transition-all"
+              className="w-full p-5 bg-white border border-[#E5E7EB] rounded-xl flex items-center justify-between card-shadow"
             >
               <div className="flex items-center space-x-4">
-                <div className="bg-white/20 p-3 rounded-2xl">
-                  <Sparkles className="w-6 h-6" />
+                <div className="bg-[#4A90E2]10 p-2.5 rounded-lg">
+                  <Sparkles className="w-5 h-5 text-[#4A90E2]" />
                 </div>
                 <div className="text-left">
-                  <p className="font-bold text-lg">Desbloquear completo</p>
-                  <p className="text-xs opacity-90">Tenha acesso a todas as ferramentas</p>
+                  <p className="font-medium text-[#1F2937]">Desbloquear completo</p>
+                  <p className="text-xs text-[#6B7280]">Todas as ferramentas</p>
                 </div>
               </div>
-              <div className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold">
+              <div className="bg-[#4A90E2] text-white px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider">
                 PRO
               </div>
             </button>
           </div>
         )}
 
-        <div className="pt-2">
+        <div className="pt-4 flex justify-center">
           <button
             onClick={() => navigate('/library')}
-            className="w-full py-4 text-[#7F8C8D] font-medium flex items-center justify-center space-x-2"
+            className="px-6 py-3 text-[#6B7280] text-sm font-medium flex items-center space-x-2 hover:bg-gray-50 rounded-full transition-colors"
           >
-            <BookOpen className="w-5 h-5" />
+            <BookOpen className="w-4 h-4" />
             <span>Biblioteca de Ferramentas</span>
           </button>
         </div>

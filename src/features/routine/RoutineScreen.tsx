@@ -58,70 +58,63 @@ export default function RoutineScreen() {
     }));
   };
 
-  const renderSection = (status: Task['status'], title: string) => {
-    const sectionTasks = tasks.filter(t => t.status === status);
-    if (sectionTasks.length === 0 && status !== 'DEPOIS') return null;
+  return (
+    <Layout title="Meu dia" onBack={() => navigate('/')}>
+      <div className="space-y-10 py-4 pb-32">
+        <div className="space-y-1">
+          <h2 className="text-xl font-medium text-[#1F2937]">Meu Dia</h2>
+          <p className="text-sm text-[#6B7280]">Organize suas atividades com calma.</p>
+        </div>
 
-    return (
-      <div className="space-y-4">
-        <h3 className="text-sm font-bold uppercase tracking-widest text-[#7F8C8D] px-2">
-          {title} ({sectionTasks.length})
-        </h3>
-        <div className="space-y-3">
-          {sectionTasks.map((task) => (
+        <div className="relative space-y-6">
+          {/* Vertical Timeline Line */}
+          <div className="absolute left-[27px] top-2 bottom-2 w-0.5 bg-gray-100" />
+
+          {tasks.map((task, index) => (
             <div
               key={task.id}
               onClick={() => toggleStatus(task.id)}
-              className="w-full bg-white p-5 rounded-[24px] card-shadow flex items-center space-x-4 text-left active:scale-[0.99] transition-all border border-transparent hover:border-[#EBF0F5] group"
+              className="relative flex items-center space-x-6 group"
             >
-              <div className="flex-shrink-0">
+              <div className="relative z-10 flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-full bg-white card-shadow border border-gray-50">
                 {task.status === 'CONCLUÍDO' ? (
-                  <CheckCircle2 className="w-6 h-6 text-[#82E0AA]" />
+                  <CheckCircle2 className="w-6 h-6 text-[#4A90E2]" />
                 ) : task.status === 'AGORA' ? (
-                  <Clock className="w-6 h-6 text-[#5DADE2]" />
+                  <div className="w-3 h-3 rounded-full bg-[#4A90E2]" />
                 ) : (
-                  <Circle className="w-6 h-6 text-[#BDC3C7]" />
+                  <div className="w-3 h-3 rounded-full bg-gray-200" />
                 )}
               </div>
-              <div className="flex-1">
-                <span className={`text-lg font-medium ${task.status === 'CONCLUÍDO' ? 'text-[#BDC3C7] line-through' : 'text-[#2C3E50]'}`}>
-                  {task.title}
-                </span>
+              
+              <div className={`flex-1 p-5 rounded-xl bg-white card-shadow border border-transparent flex items-center justify-between ${task.status === 'AGORA' ? 'border-[#4A90E2]10' : ''}`}>
+                <div className="flex flex-col">
+                  <span className={`text-base font-medium ${task.status === 'CONCLUÍDO' ? 'text-[#6B7280] line-through' : 'text-[#1F2937]'}`}>
+                    {task.title}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#6B7280] mt-1">
+                    {task.status === 'AGORA' ? 'Fazendo agora' : task.status === 'CONCLUÍDO' ? 'Concluído' : 'Próximo'}
+                  </span>
+                </div>
+                
+                <button 
+                  onClick={(e) => deleteTask(task.id, e)}
+                  className="p-2 text-gray-200 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
-              <button 
-                onClick={(e) => deleteTask(task.id, e)}
-                className="p-2 text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
             </div>
           ))}
-          {status === 'DEPOIS' && sectionTasks.length === 0 && (
-            <p className="text-center py-8 text-[#7F8C8D] italic">Nenhuma tarefa pendente.</p>
+
+          {tasks.length === 0 && (
+            <p className="text-center py-12 text-[#6B7280] italic text-sm">Nenhuma tarefa na rotina.</p>
           )}
         </div>
-      </div>
-    );
-  };
 
-  return (
-    <Layout title="Rotina" onBack={() => navigate('/')}>
-      <div className="space-y-10 py-4 pb-32">
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-[#2C3E50]">Meu Dia</h2>
-          <p className="text-[#7F8C8D]">Organize suas atividades com calma.</p>
-        </div>
-
-        <div className="space-y-10">
-          {renderSection('AGORA', 'Fazendo agora')}
-          {renderSection('DEPOIS', 'Próximas tarefas')}
-          {renderSection('CONCLUÍDO', 'Concluídas')}
-        </div>
-
-        <div className="fixed bottom-24 left-4 right-4 max-w-md mx-auto">
-          <div className="bg-white p-3 rounded-[32px] card-shadow flex items-center space-x-3 border border-gray-100">
+        <div className="fixed bottom-24 left-6 right-6 max-w-md mx-auto">
+          <div className="bg-white p-2 rounded-xl card-shadow flex items-center space-x-2 border border-gray-100">
             <input 
-              className="flex-1 px-4 py-2 outline-none text-lg text-[#2C3E50]"
+              className="flex-1 px-4 py-3 outline-none text-sm text-[#1F2937]"
               placeholder="Nova tarefa..."
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
@@ -129,10 +122,10 @@ export default function RoutineScreen() {
             />
             <button 
               onClick={addTask}
-              className="p-4 rounded-[24px] text-white active:scale-90 transition-transform shadow-lg shadow-[#5DADE230]"
+              className="p-3 rounded-lg text-white active:scale-90 transition-transform shadow-sm"
               style={{ backgroundColor: colors.primary }}
             >
-              <Plus className="w-6 h-6" />
+              <Plus className="w-5 h-5" />
             </button>
           </div>
         </div>

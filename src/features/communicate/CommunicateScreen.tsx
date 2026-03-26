@@ -51,6 +51,13 @@ const DEFAULT_PHRASES: Phrase[] = [
   }
 ];
 
+const QUICK_ACTIONS = [
+  { id: 'help', label: 'Preciso de ajuda', text: 'Preciso de ajuda, por favor.', icon: <HelpCircle className="w-6 h-6" />, color: '#4A90E2' },
+  { id: 'alone', label: 'Quero ficar sozinho', text: 'Quero ficar sozinho agora.', icon: <UserX className="w-6 h-6" />, color: '#6B7280' },
+  { id: 'uncomfortable', label: 'Estou desconfortável', text: 'Estou me sentindo desconfortável.', icon: <AlertTriangle className="w-6 h-6" />, color: '#4A90E2' },
+  { id: 'fine', label: 'Estou bem', text: 'Estou bem, obrigado.', icon: <CheckCircle className="w-6 h-6" />, color: '#6FAFE7' },
+];
+
 export default function CommunicateScreen() {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -75,15 +82,19 @@ export default function CommunicateScreen() {
     saveToStorage(STORAGE_KEYS.PHRASES, phrases);
   }, [phrases]);
 
-  const handleSpeak = (phrase: Phrase) => {
+  const handleSpeak = (text: string) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'pt-BR';
+    window.speechSynthesis.speak(utterance);
+    showToast('Falando...');
+  };
+
+  const handlePhraseAction = (phrase: Phrase) => {
     if (phrase.isLocked && !isPremium) {
       navigate('/paywall');
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(phrase.text);
-    utterance.lang = 'pt-BR';
-    window.speechSynthesis.speak(utterance);
-    showToast('Falando...');
+    handleSpeak(phrase.text);
   };
 
   const addPhrase = () => {
@@ -123,39 +134,58 @@ export default function CommunicateScreen() {
   };
 
   return (
-    <Layout title="Comunicar" onBack={() => navigate('/')}>
-      <div className="space-y-6 py-4 pb-32">
-        <div className="text-center space-y-2 mb-8">
-          <h2 className="text-2xl font-bold text-[#2C3E50]">O que você precisa?</h2>
-          <p className="text-[#7F8C8D]">Toque para falar em voz alta.</p>
+    <Layout title="Me expressar" onBack={() => navigate('/')}>
+      <div className="space-y-10 py-4 pb-32">
+        <div className="space-y-1">
+          <h2 className="text-xl font-medium text-[#1F2937]">O que você precisa?</h2>
+          <p className="text-sm text-[#6B7280]">Toque para falar em voz alta.</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
-          {phrases.map((phrase) => (
-            <div
-              key={phrase.id}
-              onClick={() => editingId !== phrase.id && handleSpeak(phrase)}
-              className={`w-full p-6 rounded-[32px] bg-white card-shadow flex flex-col active:scale-[0.98] transition-all border-2 ${editingId === phrase.id ? 'border-[#5DADE2]' : 'border-transparent'}`}
+        <div className="grid grid-cols-2 gap-4">
+          {QUICK_ACTIONS.map((action) => (
+            <button
+              key={action.id}
+              onClick={() => handleSpeak(action.text)}
+              className="p-5 rounded-xl bg-white card-shadow flex flex-col items-center text-center space-y-3 border border-transparent hover:border-gray-100"
             >
-              <div className="flex items-center space-x-4">
+              <div 
+                className="p-3 rounded-xl"
+                style={{ backgroundColor: `${action.color}10`, color: action.color }}
+              >
+                {action.icon}
+              </div>
+              <span className="text-sm font-medium text-[#1F2937] leading-tight">{action.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">Minhas frases</h3>
+          <div className="grid grid-cols-1 gap-3">
+            {phrases.map((phrase) => (
+              <div
+                key={phrase.id}
+                onClick={() => editingId !== phrase.id && handlePhraseAction(phrase)}
+                className={`w-full p-5 rounded-xl bg-white card-shadow flex items-center border ${editingId === phrase.id ? 'border-[#4A90E2]' : 'border-transparent'}`}
+              >
                 <div 
-                  className="p-4 rounded-2xl flex-shrink-0"
-                  style={{ backgroundColor: `${phrase.color}15`, color: phrase.color }}
+                  className="p-2.5 rounded-lg flex-shrink-0 mr-4"
+                  style={{ backgroundColor: `${phrase.color}10`, color: phrase.color }}
                 >
-                  {(phrase.isLocked && !isPremium) ? <Lock className="w-8 h-8" /> : <Volume2 className="w-8 h-8" />}
+                  {(phrase.isLocked && !isPremium) ? <Lock className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </div>
                 
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   {editingId === phrase.id ? (
-                    <div className="space-y-2">
+                    <div className="space-y-2 pr-2">
                       <input 
-                        className="w-full p-2 border-b border-gray-200 outline-none font-bold text-lg"
+                        className="w-full p-1 border-b border-gray-200 outline-none font-medium text-base"
                         value={newLabel}
                         onChange={(e) => setNewLabel(e.target.value)}
                         autoFocus
                       />
                       <input 
-                        className="w-full p-2 border-b border-gray-100 outline-none text-sm text-[#7F8C8D]"
+                        className="w-full p-1 border-b border-gray-100 outline-none text-xs text-[#6B7280]"
                         value={newText}
                         onChange={(e) => setNewText(e.target.value)}
                         placeholder="O que será falado..."
@@ -163,42 +193,44 @@ export default function CommunicateScreen() {
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-[#2C3E50]">{phrase.label}</span>
-                      {(phrase.isLocked && !isPremium) && <span className="text-xs font-bold text-[#9B59B6] bg-[#9B59B6]10 px-2 py-1 rounded-full">PRO</span>}
+                      <span className="text-base font-medium text-[#1F2937] truncate">{phrase.label}</span>
+                      {(phrase.isLocked && !isPremium) && (
+                        <span className="text-[10px] font-bold text-[#4A90E2] bg-[#4A90E2]10 px-2 py-0.5 rounded-md ml-2">PRO</span>
+                      )}
                     </div>
                   )}
                 </div>
 
                 {!phrase.isLocked && (
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-1 ml-2">
                     {editingId === phrase.id ? (
                       <>
-                        <button onClick={saveEdit} className="p-2 text-green-500"><Check className="w-6 h-6" /></button>
-                        <button onClick={(e) => { e.stopPropagation(); setEditingId(null); }} className="p-2 text-red-400"><X className="w-6 h-6" /></button>
+                        <button onClick={saveEdit} className="p-1.5 text-green-500"><Check className="w-5 h-5" /></button>
+                        <button onClick={(e) => { e.stopPropagation(); setEditingId(null); }} className="p-1.5 text-red-400"><X className="w-5 h-5" /></button>
                       </>
                     ) : (
                       <>
-                        <button onClick={(e) => startEditing(phrase, e)} className="p-2 text-gray-300 hover:text-[#5DADE2]"><Edit2 className="w-5 h-5" /></button>
-                        <button onClick={(e) => deletePhrase(phrase.id, e)} className="p-2 text-gray-300 hover:text-red-400"><Trash2 className="w-5 h-5" /></button>
+                        <button onClick={(e) => startEditing(phrase, e)} className="p-1.5 text-gray-200 hover:text-[#4A90E2]"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={(e) => deletePhrase(phrase.id, e)} className="p-1.5 text-gray-200 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
                       </>
                     )}
                   </div>
                 )}
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {isAdding ? (
-          <div className="bg-white p-6 rounded-[32px] card-shadow border-2 border-[#5DADE2] space-y-4">
+          <div className="bg-white p-6 rounded-xl card-shadow border border-[#4A90E2] space-y-4">
             <input 
-              className="w-full p-3 bg-gray-50 rounded-xl outline-none font-bold"
+              className="w-full p-3 bg-gray-50 rounded-lg outline-none font-medium text-sm"
               placeholder="Título (ex: Quero água)"
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
             />
             <input 
-              className="w-full p-3 bg-gray-50 rounded-xl outline-none"
+              className="w-full p-3 bg-gray-50 rounded-lg outline-none text-sm"
               placeholder="Frase completa que será falada"
               value={newText}
               onChange={(e) => setNewText(e.target.value)}
@@ -206,13 +238,13 @@ export default function CommunicateScreen() {
             <div className="flex space-x-3">
               <button 
                 onClick={addPhrase}
-                className="flex-1 py-4 bg-[#5DADE2] text-white rounded-2xl font-bold"
+                className="flex-1 py-3 bg-[#4A90E2] text-white rounded-lg font-medium text-sm"
               >
                 Salvar
               </button>
               <button 
                 onClick={() => setIsAdding(false)}
-                className="px-6 py-4 bg-gray-100 text-[#7F8C8D] rounded-2xl font-bold"
+                className="px-6 py-3 bg-gray-100 text-[#6B7280] rounded-lg font-medium text-sm"
               >
                 Cancelar
               </button>
@@ -221,9 +253,9 @@ export default function CommunicateScreen() {
         ) : (
           <button
             onClick={() => setIsAdding(true)}
-            className="w-full p-6 dashed-border rounded-[32px] flex items-center justify-center space-x-3 text-[#7F8C8D] font-bold active:scale-[0.98] transition-all"
+            className="w-full p-5 border border-dashed border-gray-200 rounded-xl flex items-center justify-center space-x-3 text-[#6B7280] font-medium text-sm"
           >
-            <Plus className="w-6 h-6" />
+            <Plus className="w-5 h-5" />
             <span>Adicionar nova frase</span>
           </button>
         )}

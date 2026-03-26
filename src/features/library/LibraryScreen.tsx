@@ -80,12 +80,12 @@ export default function LibraryScreen() {
 
   return (
     <Layout title="Biblioteca" onBack={() => selectedModule ? setSelectedModule(null) : navigate('/')}>
-      <div className="space-y-6 py-4">
+      <div className="space-y-10 py-4">
         {!selectedModule ? (
           <>
-            <div className="text-center space-y-2 mb-8">
-              <h2 className="text-2xl font-bold text-[#2C3E50]">Conhecimento</h2>
-              <p className="text-[#7F8C8D]">Dicas e ferramentas para você.</p>
+            <div className="space-y-1">
+              <h2 className="text-xl font-medium text-[#1F2937]">Conhecimento</h2>
+              <p className="text-sm text-[#6B7280]">Dicas e ferramentas para você.</p>
             </div>
             
             <div className="grid gap-4">
@@ -93,35 +93,35 @@ export default function LibraryScreen() {
                 <button
                   key={mod.id}
                   onClick={() => handleModuleClick(mod)}
-                  className="w-full p-6 bg-white rounded-[24px] card-shadow flex items-center justify-between active:scale-[0.98] transition-all border border-transparent"
+                  className="w-full p-5 bg-white rounded-xl card-shadow flex items-center justify-between border border-transparent hover:border-gray-100"
                 >
                   <div className="flex items-center space-x-4">
                     <div 
-                      className="p-3 rounded-xl"
-                      style={{ backgroundColor: `${mod.color}15`, color: mod.color }}
+                      className="p-2.5 rounded-lg"
+                      style={{ backgroundColor: `${mod.color}10`, color: mod.color }}
                     >
-                      {(mod.isLocked && !isPremium) ? <Lock className="w-6 h-6" /> : mod.icon}
+                      {(mod.isLocked && !isPremium) ? <Lock className="w-5 h-5" /> : mod.icon}
                     </div>
                     <div className="text-left">
-                      <span className="text-lg font-bold text-[#2C3E50] block">{mod.title}</span>
-                      {(mod.isLocked && !isPremium) && <span className="text-xs font-bold text-[#9B59B6]">Desbloquear Pro</span>}
+                      <span className="text-base font-medium text-[#1F2937] block">{mod.title}</span>
+                      {(mod.isLocked && !isPremium) && <span className="text-[10px] font-bold text-[#4A90E2] uppercase tracking-wider">Desbloquear Pro</span>}
                     </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-[#7F8C8D]" />
+                  <ChevronRight className="w-4 h-4 text-[#6B7280]" />
                 </button>
               ))}
             </div>
           </>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-10">
             <div className="flex items-center space-x-4">
               <div 
-                className="p-4 rounded-2xl"
-                style={{ backgroundColor: `${selectedModule.color}15`, color: selectedModule.color }}
+                className="p-3 rounded-xl"
+                style={{ backgroundColor: `${selectedModule.color}10`, color: selectedModule.color }}
               >
                 {selectedModule.icon}
               </div>
-              <h2 className="text-2xl font-bold text-[#2C3E50]">{selectedModule.title}</h2>
+              <h2 className="text-xl font-medium text-[#1F2937]">{selectedModule.title}</h2>
             </div>
             
             <div className="space-y-3">
@@ -132,14 +132,14 @@ export default function LibraryScreen() {
                   <button 
                     key={idx} 
                     onClick={() => toggleCheck(itemId)}
-                    className={`w-full p-6 rounded-[24px] bg-white border flex items-center space-x-4 transition-all ${isChecked ? 'border-[#82E0AA] bg-[#82E0AA05]' : 'border-gray-100'}`}
+                    className={`w-full p-5 rounded-xl bg-white border flex items-center space-x-4 ${isChecked ? 'border-[#4A90E2] bg-[#4A90E2]05' : 'border-gray-100'}`}
                   >
                     {isChecked ? (
-                      <CheckCircle2 className="w-6 h-6 text-[#82E0AA]" />
+                      <CheckCircle2 className="w-5 h-5 text-[#4A90E2]" />
                     ) : (
-                      <Circle className="w-6 h-6 text-[#BDC3C7]" />
+                      <div className="w-5 h-5 rounded-full border-2 border-gray-200" />
                     )}
-                    <span className={`text-lg ${isChecked ? 'text-[#7F8C8D] line-through' : 'text-[#2C3E50]'}`}>
+                    <span className={`text-base ${isChecked ? 'text-[#6B7280] line-through' : 'text-[#1F2937]'}`}>
                       {item}
                     </span>
                   </button>
@@ -149,7 +149,7 @@ export default function LibraryScreen() {
 
             <button 
               onClick={() => navigate('/')}
-              className="w-full py-6 rounded-[24px] font-bold text-white mt-8 shadow-lg active:scale-95 transition-all"
+              className="w-full py-4 rounded-xl font-medium text-white mt-8 shadow-sm text-sm"
               style={{ backgroundColor: selectedModule.color }}
             >
               Usar agora

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
-import { Star, Check, ArrowLeft, Lock } from 'lucide-react';
+import { Star, Check } from 'lucide-react';
 import Layout from '../../components/Layout';
 import { colors } from '../../theme/colors';
 import { unlockPremium } from '../../utils/premium';
@@ -27,46 +26,41 @@ const PaywallScreen: React.FC = () => {
       title="Premium" 
       onBack={() => navigate('/')}
     >
-      <div className="flex flex-col items-center text-center p-6 space-y-8">
-        <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="w-20 h-20 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: colors.primary + '20' }}
+      <div className="flex flex-col items-center text-center py-10 space-y-10">
+        <div 
+          className="w-20 h-20 rounded-2xl flex items-center justify-center"
+          style={{ backgroundColor: colors.primary + '10' }}
         >
-          <Star size={40} color={colors.primary} />
-        </motion.div>
+          <Star size={32} color={colors.primary} />
+        </div>
 
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold" style={{ color: colors.textPrimary }}>
+          <h2 className="text-2xl font-medium text-[#1F2937]">
             Desbloqueie o NeuroCalm Pro
           </h2>
-          <p className="text-sm opacity-70" style={{ color: colors.textPrimary }}>
+          <p className="text-sm text-[#6B7280]">
             Tenha acesso a todas as ferramentas para o seu bem-estar.
           </p>
         </div>
 
-        <div className="w-full space-y-4 text-left">
+        <div className="w-full space-y-5 text-left bg-white p-6 rounded-xl card-shadow border border-gray-50">
           {benefits.map((benefit, index) => (
-            <motion.div 
+            <div 
               key={index}
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: index * 0.1 }}
               className="flex items-start space-x-3"
             >
-              <div className="mt-1">
-                <Check size={18} color={colors.primary} />
+              <div className="mt-0.5">
+                <Check size={16} color={colors.primary} />
               </div>
-              <span className="text-sm" style={{ color: colors.textPrimary }}>{benefit}</span>
-            </motion.div>
+              <span className="text-sm text-[#1F2937] leading-relaxed">{benefit}</span>
+            </div>
           ))}
         </div>
 
-        <div className="w-full pt-8 space-y-4">
+        <div className="w-full pt-4 space-y-4">
           <button
             onClick={handleUnlock}
-            className="w-full py-4 rounded-2xl font-bold text-lg transition-transform active:scale-95 shadow-lg"
+            className="w-full py-4 rounded-xl font-medium text-base shadow-sm"
             style={{ 
               backgroundColor: colors.primary,
               color: 'white'
@@ -75,7 +69,7 @@ const PaywallScreen: React.FC = () => {
             Desbloquear Agora
           </button>
           
-          <p className="text-xs opacity-50" style={{ color: colors.textPrimary }}>
+          <p className="text-xs text-[#6B7280]">
             Pagamento único. Acesso vitalício.
           </p>
         </div>

@@ -9,6 +9,12 @@ export function useTimer({ initialSeconds, onTimeUp }: UseTimerProps) {
   const [timeLeft, setTimeLeft] = useState(initialSeconds);
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const onTimeUpRef = useRef(onTimeUp);
+
+  // Keep onTimeUpRef up to date
+  useEffect(() => {
+    onTimeUpRef.current = onTimeUp;
+  }, [onTimeUp]);
 
   const clearTimer = useCallback(() => {
     if (intervalRef.current) {
@@ -18,24 +24,21 @@ export function useTimer({ initialSeconds, onTimeUp }: UseTimerProps) {
   }, []);
 
   const start = useCallback(() => {
-    if (isRunning || timeLeft <= 0) return;
+    if (intervalRef.current) return; // Prevent multiple intervals
 
     setIsRunning(true);
-    // Clear any existing interval before starting a new one
-    clearTimer();
-    
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearTimer();
           setIsRunning(false);
-          if (onTimeUp) onTimeUp();
+          if (onTimeUpRef.current) onTimeUpRef.current();
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-  }, [isRunning, timeLeft, clearTimer, onTimeUp]);
+  }, [clearTimer]);
 
   const pause = useCallback(() => {
     clearTimer();

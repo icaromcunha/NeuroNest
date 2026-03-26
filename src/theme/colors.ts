@@ -1,11 +1,11 @@
 export const colors = {
-  primary: '#5DADE2', // Soft Blue
-  secondary: '#76D7C4', // Soft Teal
-  background: '#F7F9FB', // Off-white
+  primary: '#4A90E2', // Primary Blue
+  secondary: '#6FAFE7', // Secondary Blue (soft accent)
+  background: '#F8FAFC', // Off-white
   surface: '#FFFFFF', // White
-  textPrimary: '#2C3E50', // Dark Gray
-  textSecondary: '#7F8C8D', // Medium Gray
-  success: '#82E0AA', // Soft Green
-  alert: '#F8C471', // Soft Orange
-  border: '#EBF0F5',
+  textPrimary: '#1F2937', // Dark Neutral
+  textSecondary: '#6B7280', // Medium Neutral
+  border: '#E5E7EB',
+  success: '#4A90E2', // Using primary for success to maintain minimal palette
+  alert: '#6FAFE7', // Using secondary for alert to maintain minimal palette
 };
