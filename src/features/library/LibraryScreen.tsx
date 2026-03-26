@@ -5,42 +5,44 @@ import { colors } from '../../theme/colors';
 import { saveToStorage, loadFromStorage } from '../../utils/storage';
 import { Heart, MessageCircle, Calendar, ChevronRight, CheckCircle2, Circle, Lock } from 'lucide-react';
 
+import { isUserPremium } from '../../utils/premium';
+
 const MODULES = [
   {
-    id: 'reg',
-    title: 'Regulação',
+    id: 'sono',
+    title: 'Sono',
     icon: <Heart className="w-6 h-6" />,
     color: colors.primary,
     items: [
-      'Respiração profunda',
-      'Lugar silencioso',
-      'Reduzir luzes',
-      'Peso no corpo'
+      'Higiene do sono',
+      'Ruído branco',
+      'Temperatura ideal',
+      'Rotina noturna'
     ]
   },
   {
-    id: 'com',
-    title: 'Comunicação',
+    id: 'foco',
+    title: 'Foco',
     icon: <MessageCircle className="w-6 h-6" />,
     color: colors.secondary,
     items: [
-      'Cartões de ajuda',
-      'Frases prontas',
-      'Escrita livre',
-      'Sinais básicos'
+      'Técnica Pomodoro',
+      'Bloqueio de distrações',
+      'Ambiente de estudo',
+      'Metas curtas'
     ],
     isLocked: true
   },
   {
-    id: 'rot',
-    title: 'Rotina',
+    id: 'crise',
+    title: 'Crise Sensorial',
     icon: <Calendar className="w-6 h-6" />,
     color: colors.alert,
     items: [
-      'Passo a passo',
-      'Checklist diário',
-      'Próximas tarefas',
-      'Histórico'
+      'Identificar gatilhos',
+      'Kit de emergência',
+      'Lugar seguro',
+      'Técnicas de grounding'
     ],
     isLocked: true
   }
@@ -48,6 +50,7 @@ const MODULES = [
 
 export default function LibraryScreen() {
   const navigate = useNavigate();
+  const isPremium = isUserPremium();
   const [selectedModule, setSelectedModule] = useState<typeof MODULES[0] | null>(null);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
 
@@ -68,7 +71,7 @@ export default function LibraryScreen() {
   };
 
   const handleModuleClick = (mod: typeof MODULES[0]) => {
-    if (mod.isLocked) {
+    if (mod.isLocked && !isPremium) {
       navigate('/paywall');
     } else {
       setSelectedModule(mod);
@@ -97,11 +100,11 @@ export default function LibraryScreen() {
                       className="p-3 rounded-xl"
                       style={{ backgroundColor: `${mod.color}15`, color: mod.color }}
                     >
-                      {mod.isLocked ? <Lock className="w-6 h-6" /> : mod.icon}
+                      {(mod.isLocked && !isPremium) ? <Lock className="w-6 h-6" /> : mod.icon}
                     </div>
                     <div className="text-left">
                       <span className="text-lg font-bold text-[#2C3E50] block">{mod.title}</span>
-                      {mod.isLocked && <span className="text-xs font-bold text-[#9B59B6]">Desbloquear Pro</span>}
+                      {(mod.isLocked && !isPremium) && <span className="text-xs font-bold text-[#9B59B6]">Desbloquear Pro</span>}
                     </div>
                   </div>
                   <ChevronRight className="w-5 h-5 text-[#7F8C8D]" />

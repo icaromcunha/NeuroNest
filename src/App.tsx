@@ -6,7 +6,7 @@ import PauseDetailScreen from './features/pause/PauseDetailScreen';
 import CommunicateScreen from './features/communicate/CommunicateScreen';
 import RoutineScreen from './features/routine/RoutineScreen';
 import LibraryScreen from './features/library/LibraryScreen';
-import PaywallScreen from './features/paywall/PaywallScreen';
+import PaywallScreen from './features/premium/PaywallScreen';
 
 export default function App() {
   return (

@@ -6,44 +6,47 @@ import { useToast } from '../../components/Toast';
 import { saveToStorage, loadFromStorage, STORAGE_KEYS } from '../../utils/storage';
 import { HelpCircle, UserX, AlertTriangle, CheckCircle, Volume2, Plus, Trash2, Edit2, Check, X, Lock } from 'lucide-react';
 
+import { isUserPremium } from '../../utils/premium';
+
 interface Phrase {
   id: string;
   label: string;
   text: string;
   color: string;
+  category?: string;
   isLocked?: boolean;
 }
 
 const DEFAULT_PHRASES: Phrase[] = [
   { 
     id: '1',
-    label: 'Preciso de ajuda', 
-    text: 'Eu preciso de ajuda, por favor.',
-    color: colors.primary
+    label: 'Trabalho', 
+    text: 'Preciso de ajuda com o trabalho.',
+    color: colors.primary,
+    category: 'Trabalho'
   },
   { 
     id: '2',
-    label: 'Quero ficar sozinho', 
-    text: 'Eu quero ficar sozinho um pouco.',
-    color: colors.secondary
+    label: 'Médico', 
+    text: 'Preciso falar com o médico.',
+    color: colors.secondary,
+    category: 'Médico',
+    isLocked: true
   },
   { 
     id: '3',
-    label: 'Estou desconfortável', 
-    text: 'Eu estou me sentindo desconfortável aqui.',
-    color: colors.alert
+    label: 'Social', 
+    text: 'Quero interagir socialmente.',
+    color: colors.alert,
+    category: 'Social',
+    isLocked: true
   },
   { 
     id: '4',
-    label: 'Estou bem', 
-    text: 'Eu estou bem, obrigado.',
-    color: colors.success
-  },
-  {
-    id: 'locked_1',
-    label: 'Sentimentos',
-    text: '',
-    color: '#9B59B6',
+    label: 'Família', 
+    text: 'Quero falar com minha família.',
+    color: colors.success,
+    category: 'Família',
     isLocked: true
   }
 ];
@@ -51,6 +54,7 @@ const DEFAULT_PHRASES: Phrase[] = [
 export default function CommunicateScreen() {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const isPremium = isUserPremium();
   const [phrases, setPhrases] = useState<Phrase[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -72,7 +76,7 @@ export default function CommunicateScreen() {
   }, [phrases]);
 
   const handleSpeak = (phrase: Phrase) => {
-    if (phrase.isLocked) {
+    if (phrase.isLocked && !isPremium) {
       navigate('/paywall');
       return;
     }
@@ -138,7 +142,7 @@ export default function CommunicateScreen() {
                   className="p-4 rounded-2xl flex-shrink-0"
                   style={{ backgroundColor: `${phrase.color}15`, color: phrase.color }}
                 >
-                  {phrase.isLocked ? <Lock className="w-8 h-8" /> : <Volume2 className="w-8 h-8" />}
+                  {(phrase.isLocked && !isPremium) ? <Lock className="w-8 h-8" /> : <Volume2 className="w-8 h-8" />}
                 </div>
                 
                 <div className="flex-1">
@@ -160,7 +164,7 @@ export default function CommunicateScreen() {
                   ) : (
                     <div className="flex items-center justify-between">
                       <span className="text-xl font-bold text-[#2C3E50]">{phrase.label}</span>
-                      {phrase.isLocked && <span className="text-xs font-bold text-[#9B59B6] bg-[#9B59B6]10 px-2 py-1 rounded-full">PRO</span>}
+                      {(phrase.isLocked && !isPremium) && <span className="text-xs font-bold text-[#9B59B6] bg-[#9B59B6]10 px-2 py-1 rounded-full">PRO</span>}
                     </div>
                   )}
                 </div>
