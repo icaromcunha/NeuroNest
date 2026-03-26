@@ -2,145 +2,143 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { colors } from '../../theme/colors';
-import { PauseState } from '../../types';
-import { useToast } from '../../components/Toast';
+import { useTimer } from '../../hooks/useTimer';
+import { formatTime } from '../../utils/formatTime';
+import { Play, Pause, RotateCcw, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
-const PROTOCOLS = {
-  AMARELO: [
-    'Respire fundo por 1 minuto',
-    'Reduza estímulos (som/luz)',
-    'Continue devagar'
-  ],
-  LARANJA: [
-    'Vá para um lugar mais silencioso',
-    'Respire por 2 minutos',
-    'Envie mensagem pronta'
-  ],
-  VERMELHO: [
-    'Saia imediatamente do ambiente',
-    'Evite interação',
-    'Use mensagem de emergência'
-  ]
-};
+const MESSAGES = [
+  "Você está seguro",
+  "Vamos respirar juntos",
+  "Tudo bem ir devagar",
+  "Este momento vai passar",
+  "Você é forte e capaz",
+  "Sinta seus pés no chão",
+  "Apenas respire..."
+];
 
 export default function PauseDetailScreen() {
-  const { state } = useParams<{ state: PauseState }>();
+  const { state } = useParams<{ state: string }>();
   const navigate = useNavigate();
-  const { showToast } = useToast();
-  const [checked, setChecked] = useState<boolean[]>([false, false, false]);
-  const [timer, setTimer] = useState<number | null>(null);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [messageIdx, setMessageIdx] = useState(0);
 
-  const protocol = state ? PROTOCOLS[state] : [];
-  const color = state === 'AMARELO' ? colors.yellow : state === 'LARANJA' ? colors.orange : colors.red;
+  const { timeLeft, isRunning, start, pause, reset } = useTimer({
+    initialSeconds: state === 'pomodoro' ? 1500 : state === 'countdown' ? 300 : 120,
+    onTimeUp: () => {}
+  });
 
   useEffect(() => {
-    let interval: any;
-    if (isTimerRunning && timer !== null && timer > 0) {
-      interval = setInterval(() => setTimer(t => (t !== null ? t - 1 : null)), 1000);
-    } else if (timer === 0) {
-      setIsTimerRunning(false);
-      setTimer(null);
-      showToast('Tempo concluído. Respire fundo.');
+    if (state === 'messages') {
+      const interval = setInterval(() => {
+        setMessageIdx((prev) => (prev + 1) % MESSAGES.length);
+      }, 5000);
+      return () => clearInterval(interval);
     }
-    return () => clearInterval(interval);
-  }, [isTimerRunning, timer, showToast]);
+  }, [state]);
 
-  const startTimer = (minutes: number) => {
-    if (timer === null) {
-      setTimer(minutes * 60);
-    }
-    setIsTimerRunning(true);
-  };
-
-  const stopTimer = () => setIsTimerRunning(false);
-  const resetTimer = () => {
-    setTimer(null);
-    setIsTimerRunning(false);
-  };
-
-  const copyMessage = () => {
-    const msg = state === 'VERMELHO' 
-      ? 'Estou em crise sensorial. Por favor, não me toque e me dê espaço.' 
-      : 'Não estou me sentindo bem agora. Preciso de um tempo em silêncio.';
-    navigator.clipboard.writeText(msg);
-    showToast('Mensagem copiada!');
-  };
-
-  return (
-    <Layout title={`Protocolo ${state}`} onBack={() => navigate('/pause')}>
-      <div className="space-y-6 py-4">
-        <div 
-          className="p-6 rounded-3xl text-center font-bold text-xl shadow-sm"
-          style={{ backgroundColor: color, color: colors.text }}
-        >
-          Você está em {state}
+  const renderBreathing = () => (
+    <div className="flex flex-col items-center justify-center h-full space-y-12 py-12">
+      <div className="relative flex items-center justify-center">
+        <motion.div
+          animate={{
+            scale: isRunning ? [1, 1.5, 1] : 1,
+            opacity: isRunning ? [0.3, 0.6, 0.3] : 0.3,
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="w-48 h-48 rounded-full"
+          style={{ backgroundColor: colors.primary }}
+        />
+        <div className="absolute text-white font-bold text-2xl">
+          {formatTime(timeLeft)}
         </div>
+      </div>
 
-        <div className="space-y-3">
-          {protocol.map((step, idx) => (
-            <div 
-              key={idx}
-              onClick={() => {
-                const newChecked = [...checked];
-                newChecked[idx] = !newChecked[idx];
-                setChecked(newChecked);
-              }}
-              className={`p-5 rounded-2xl border-2 flex items-center space-x-4 transition-all cursor-pointer ${checked[idx] ? 'bg-green-50 border-green-200' : 'bg-white border-gray-100'}`}
-            >
-              <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${checked[idx] ? 'bg-green-500 border-green-500' : 'border-gray-300'}`}>
-                {checked[idx] && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4"><path d="M20 6 9 17l-5-5"/></svg>}
-              </div>
-              <span className={`text-lg font-medium ${checked[idx] ? 'text-green-800 opacity-60' : 'text-gray-800'}`}>{step}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-col space-y-4 pt-4">
-          {(state === 'LARANJA' || state === 'AMARELO') && (
-            <div className="bg-white p-6 rounded-3xl border-2 border-gray-100 shadow-sm space-y-4">
-              <div className="text-center">
-                <p className="text-sm text-gray-500 uppercase tracking-widest mb-1">Timer de Respiração</p>
-                <p className="text-4xl font-mono font-bold">
-                  {timer !== null ? `${Math.floor(timer / 60)}:${(timer % 60).toString().padStart(2, '0')}` : (state === 'AMARELO' ? '1:00' : '2:00')}
-                </p>
-              </div>
-              
-              <div className="flex space-x-2">
-                {!isTimerRunning ? (
-                  <button 
-                    onClick={() => startTimer(state === 'AMARELO' ? 1 : 2)}
-                    className="flex-1 py-4 bg-gray-800 text-white rounded-2xl font-bold active:opacity-90"
-                  >
-                    {timer === null ? 'Iniciar' : 'Retomar'}
-                  </button>
-                ) : (
-                  <button 
-                    onClick={stopTimer}
-                    className="flex-1 py-4 bg-orange-500 text-white rounded-2xl font-bold active:opacity-90"
-                  >
-                    Pausar
-                  </button>
-                )}
-                <button 
-                  onClick={resetTimer}
-                  className="px-6 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold active:bg-gray-200"
-                >
-                  Reiniciar
-                </button>
-              </div>
-            </div>
-          )}
-
+      <div className="text-center space-y-4">
+        <p className="text-2xl font-bold text-[#2C3E50]">
+          {isRunning ? "Siga o círculo..." : "Pronto para começar?"}
+        </p>
+        <div className="flex items-center justify-center space-x-6">
           <button 
-            onClick={copyMessage}
-            className="w-full py-6 bg-white border-4 border-gray-800 rounded-3xl text-xl font-bold flex items-center justify-center space-x-2 active:bg-gray-50"
+            onClick={reset}
+            className="p-4 rounded-full bg-gray-100 text-[#7F8C8D] active:scale-90 transition-all"
           >
-            <span>💬</span>
-            <span>Mensagem Pronta</span>
+            <RotateCcw className="w-8 h-8" />
+          </button>
+          <button 
+            onClick={isRunning ? pause : start}
+            className="p-8 rounded-full text-white shadow-lg active:scale-95 transition-all"
+            style={{ backgroundColor: colors.primary }}
+          >
+            {isRunning ? <Pause className="w-10 h-10" /> : <Play className="w-10 h-10 ml-1" />}
           </button>
         </div>
       </div>
+    </div>
+  );
+
+  const renderCountdown = () => (
+    <div className="flex flex-col items-center justify-center h-full space-y-12 py-12">
+      <div className="text-8xl font-bold text-[#2C3E50] tracking-tighter">
+        {formatTime(timeLeft)}
+      </div>
+      <div className="flex items-center justify-center space-x-6">
+        <button 
+          onClick={reset}
+          className="p-4 rounded-full bg-gray-100 text-[#7F8C8D] active:scale-90 transition-all"
+        >
+          <RotateCcw className="w-8 h-8" />
+        </button>
+        <button 
+          onClick={isRunning ? pause : start}
+          className="p-8 rounded-full text-white shadow-lg active:scale-95 transition-all"
+          style={{ backgroundColor: colors.secondary }}
+        >
+          {isRunning ? <Pause className="w-10 h-10" /> : <Play className="w-10 h-10 ml-1" />}
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderMessages = () => (
+    <div className="flex flex-col items-center justify-center h-full py-24 px-8 text-center">
+      <div className="h-48 flex items-center justify-center">
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={messageIdx}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 1 }}
+            className="text-3xl font-bold text-[#2C3E50] leading-tight"
+          >
+            {MESSAGES[messageIdx]}
+          </motion.p>
+        </AnimatePresence>
+      </div>
+      <div className="mt-12">
+        <button 
+          onClick={() => setMessageIdx((prev) => (prev + 1) % MESSAGES.length)}
+          className="p-6 rounded-full bg-white card-shadow text-[#7F8C8D] flex items-center space-x-2 font-bold active:scale-95 transition-all"
+        >
+          <span>Próxima mensagem</span>
+          <ChevronRight className="w-6 h-6" />
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <Layout 
+      title={state === 'breathing' ? 'Respiração' : state === 'countdown' ? 'Contagem' : state === 'pomodoro' ? 'Foco' : 'Mensagens'} 
+      onBack={() => navigate('/pause')}
+    >
+      {state === 'breathing' && renderBreathing()}
+      {(state === 'countdown' || state === 'pomodoro') && renderCountdown()}
+      {state === 'messages' && renderMessages()}
     </Layout>
   );
 }

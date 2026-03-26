@@ -1,99 +1,159 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { colors } from '../../theme/colors';
-import { useToast } from '../../components/Toast';
+import { saveToStorage, loadFromStorage } from '../../utils/storage';
+import { Heart, MessageCircle, Calendar, ChevronRight, CheckCircle2, Circle, Lock } from 'lucide-react';
 
 const MODULES = [
   {
-    title: 'Sono',
-    icon: '🌙',
-    locked: false,
-    items: ['Reduzir luz', 'Evitar telas', 'Ambiente silencioso', 'Temperatura agradável']
+    id: 'reg',
+    title: 'Regulação',
+    icon: <Heart className="w-6 h-6" />,
+    color: colors.primary,
+    items: [
+      'Respiração profunda',
+      'Lugar silencioso',
+      'Reduzir luzes',
+      'Peso no corpo'
+    ]
   },
   {
-    title: 'Foco',
-    icon: '🎯',
-    locked: false,
-    items: ['Fones de ouvido', 'Timer Pomodoro', 'Mesa limpa', 'Uma tarefa por vez']
+    id: 'com',
+    title: 'Comunicação',
+    icon: <MessageCircle className="w-6 h-6" />,
+    color: colors.secondary,
+    items: [
+      'Cartões de ajuda',
+      'Frases prontas',
+      'Escrita livre',
+      'Sinais básicos'
+    ],
+    isLocked: true
   },
   {
-    title: 'Crise Sensorial',
-    icon: '🧘',
-    locked: true,
-    items: ['Lugar seguro', 'Peso (cobertor)', 'Estímulo visual calmo', 'Sem toque físico']
+    id: 'rot',
+    title: 'Rotina',
+    icon: <Calendar className="w-6 h-6" />,
+    color: colors.alert,
+    items: [
+      'Passo a passo',
+      'Checklist diário',
+      'Próximas tarefas',
+      'Histórico'
+    ],
+    isLocked: true
   }
 ];
 
 export default function LibraryScreen() {
   const navigate = useNavigate();
-  const { showToast } = useToast();
   const [selectedModule, setSelectedModule] = useState<typeof MODULES[0] | null>(null);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
 
-  const toggleItem = (item: string) => {
-    setCheckedItems(prev => ({ ...prev, [item]: !prev[item] }));
+  useEffect(() => {
+    const saved = loadFromStorage('neurocalm_library_checks');
+    if (saved) setCheckedItems(saved);
+  }, []);
+
+  useEffect(() => {
+    saveToStorage('neurocalm_library_checks', checkedItems);
+  }, [checkedItems]);
+
+  const toggleCheck = (itemId: string) => {
+    setCheckedItems(prev => ({
+      ...prev,
+      [itemId]: !prev[itemId]
+    }));
   };
 
   const handleModuleClick = (mod: typeof MODULES[0]) => {
-    if (mod.locked) {
+    if (mod.isLocked) {
       navigate('/paywall');
     } else {
       setSelectedModule(mod);
     }
   };
 
-  const handleUseNow = () => {
-    showToast('Iniciando modo ' + selectedModule?.title);
-    // In a real app, this could trigger a specific UI mode or timer
-  };
-
   return (
     <Layout title="Biblioteca" onBack={() => selectedModule ? setSelectedModule(null) : navigate('/')}>
-      {!selectedModule ? (
-        <div className="space-y-4 py-4">
-          {MODULES.map(mod => (
-            <button
-              key={mod.title}
-              onClick={() => handleModuleClick(mod)}
-              className="w-full p-8 bg-white border-4 border-gray-100 rounded-3xl flex items-center space-x-6 active:opacity-70 transition-opacity relative"
-            >
-              {mod.locked && <span className="absolute top-4 right-4 text-xs">🔒</span>}
-              <span className="text-5xl">{mod.icon}</span>
-              <span className="text-2xl font-bold">{mod.title}</span>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-6 py-4">
-          <div className="flex items-center space-x-4 mb-4">
-            <span className="text-6xl">{selectedModule.icon}</span>
-            <h2 className="text-3xl font-bold">{selectedModule.title}</h2>
-          </div>
-          
-          <div className="space-y-3">
-            {selectedModule.items.map((item, idx) => (
+      <div className="space-y-6 py-4">
+        {!selectedModule ? (
+          <>
+            <div className="text-center space-y-2 mb-8">
+              <h2 className="text-2xl font-bold text-[#2C3E50]">Conhecimento</h2>
+              <p className="text-[#7F8C8D]">Dicas e ferramentas para você.</p>
+            </div>
+            
+            <div className="grid gap-4">
+              {MODULES.map(mod => (
+                <button
+                  key={mod.id}
+                  onClick={() => handleModuleClick(mod)}
+                  className="w-full p-6 bg-white rounded-[24px] card-shadow flex items-center justify-between active:scale-[0.98] transition-all border border-transparent"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div 
+                      className="p-3 rounded-xl"
+                      style={{ backgroundColor: `${mod.color}15`, color: mod.color }}
+                    >
+                      {mod.isLocked ? <Lock className="w-6 h-6" /> : mod.icon}
+                    </div>
+                    <div className="text-left">
+                      <span className="text-lg font-bold text-[#2C3E50] block">{mod.title}</span>
+                      {mod.isLocked && <span className="text-xs font-bold text-[#9B59B6]">Desbloquear Pro</span>}
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[#7F8C8D]" />
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="space-y-8">
+            <div className="flex items-center space-x-4">
               <div 
-                key={idx} 
-                onClick={() => toggleItem(item)}
-                className={`p-6 rounded-2xl border-2 flex items-center space-x-4 cursor-pointer transition-colors ${checkedItems[item] ? 'bg-green-50 border-green-200' : 'bg-white border-gray-100'}`}
+                className="p-4 rounded-2xl"
+                style={{ backgroundColor: `${selectedModule.color}15`, color: selectedModule.color }}
               >
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${checkedItems[item] ? 'bg-green-500 border-green-500' : 'border-gray-300'}`}>
-                  {checkedItems[item] && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4"><path d="M20 6 9 17l-5-5"/></svg>}
-                </div>
-                <span className={`text-xl ${checkedItems[item] ? 'text-green-800 opacity-60' : 'text-gray-800'}`}>{item}</span>
+                {selectedModule.icon}
               </div>
-            ))}
-          </div>
+              <h2 className="text-2xl font-bold text-[#2C3E50]">{selectedModule.title}</h2>
+            </div>
+            
+            <div className="space-y-3">
+              {selectedModule.items.map((item, idx) => {
+                const itemId = `${selectedModule.id}-${idx}`;
+                const isChecked = checkedItems[itemId];
+                return (
+                  <button 
+                    key={idx} 
+                    onClick={() => toggleCheck(itemId)}
+                    className={`w-full p-6 rounded-[24px] bg-white border flex items-center space-x-4 transition-all ${isChecked ? 'border-[#82E0AA] bg-[#82E0AA05]' : 'border-gray-100'}`}
+                  >
+                    {isChecked ? (
+                      <CheckCircle2 className="w-6 h-6 text-[#82E0AA]" />
+                    ) : (
+                      <Circle className="w-6 h-6 text-[#BDC3C7]" />
+                    )}
+                    <span className={`text-lg ${isChecked ? 'text-[#7F8C8D] line-through' : 'text-[#2C3E50]'}`}>
+                      {item}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-          <button 
-            onClick={handleUseNow}
-            className="w-full py-6 bg-gray-800 text-white rounded-3xl text-xl font-bold active:opacity-90 mt-8"
-          >
-            Usar agora
-          </button>
-        </div>
-      )}
+            <button 
+              onClick={() => navigate('/')}
+              className="w-full py-6 rounded-[24px] font-bold text-white mt-8 shadow-lg active:scale-95 transition-all"
+              style={{ backgroundColor: selectedModule.color }}
+            >
+              Usar agora
+            </button>
+          </div>
+        )}
+      </div>
     </Layout>
   );
 }

@@ -1,48 +1,74 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { colors } from '../../theme/colors';
-import { PauseState } from '../../types';
-import { saveToStorage, loadFromStorage, STORAGE_KEYS } from '../../lib/storage';
+import { Wind, Timer, Heart, Clock } from 'lucide-react';
 
 export default function PauseScreen() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const lastState = loadFromStorage(STORAGE_KEYS.LAST_PAUSE_STATE);
-    if (lastState) {
-      // Optional: highlight last state or auto-navigate
-      console.log('Last state was:', lastState);
-    }
-  }, []);
-
-  const handleNavigate = (state: PauseState) => {
-    saveToStorage(STORAGE_KEYS.LAST_PAUSE_STATE, state);
-    navigate(`/pause/${state}`);
-  };
-
-  const options: { label: string; state: PauseState; color: string; desc: string }[] = [
-    { label: 'Amarelo', state: 'AMARELO', color: colors.yellow, desc: 'Início de sobrecarga' },
-    { label: 'Laranja', state: 'LARANJA', color: colors.orange, desc: 'Perdendo o controle' },
-    { label: 'Vermelho', state: 'VERMELHO', color: colors.red, desc: 'Crise' },
+  const options = [
+    { 
+      label: 'Respiração guiada', 
+      path: '/pause/breathing', 
+      icon: <Wind className="w-8 h-8" />,
+      color: colors.primary,
+      desc: 'Siga o ritmo da calma'
+    },
+    { 
+      label: 'Contagem visual', 
+      path: '/pause/countdown', 
+      icon: <Timer className="w-8 h-8" />,
+      color: colors.secondary,
+      desc: 'Foque no tempo passando'
+    },
+    { 
+      label: 'Foco (Pomodoro)', 
+      path: '/pause/pomodoro', 
+      icon: <Clock className="w-8 h-8" />,
+      color: '#9B59B6',
+      desc: '25 minutos de foco total'
+    },
+    { 
+      label: 'Mensagens de paz', 
+      path: '/pause/messages', 
+      icon: <Heart className="w-8 h-8" />,
+      color: colors.success,
+      desc: 'Palavras que confortam'
+    },
   ];
 
   return (
     <Layout title="Pausa" onBack={() => navigate('/')}>
       <div className="space-y-6 py-4">
-        <p className="text-lg text-center mb-8 text-gray-600">Como você se sente agora?</p>
+        <div className="text-center space-y-2 mb-8">
+          <h2 className="text-2xl font-bold text-[#2C3E50]">Momento de Calma</h2>
+          <p className="text-[#7F8C8D]">Escolha como você quer relaxar agora.</p>
+        </div>
         
-        {options.map((opt) => (
-          <button
-            key={opt.state}
-            onClick={() => handleNavigate(opt.state)}
-            className="w-full p-8 rounded-3xl flex flex-col items-center space-y-2 shadow-sm active:opacity-70 transition-opacity"
-            style={{ backgroundColor: opt.color, color: colors.text }}
-          >
-            <span className="text-2xl font-bold uppercase tracking-widest">{opt.label}</span>
-            <span className="text-sm opacity-80">{opt.desc}</span>
-          </button>
-        ))}
+        <div className="grid gap-4">
+          {options.map((opt) => (
+            <button
+              key={opt.path}
+              onClick={() => navigate(opt.path)}
+              className="w-full p-6 rounded-[24px] bg-white card-shadow flex items-center text-left space-x-6 active:scale-[0.98] transition-all border border-transparent"
+            >
+              <div 
+                className="p-4 rounded-2xl"
+                style={{ backgroundColor: `${opt.color}15`, color: opt.color }}
+              >
+                {opt.icon}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-[#2C3E50]">{opt.label}</h3>
+                <p className="text-sm text-[#7F8C8D]">{opt.desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-12 p-8 rounded-[32px] bg-white card-shadow text-center space-y-4">
+          <p className="text-[#7F8C8D] italic">"Tudo bem ir devagar. Você está seguro aqui."</p>
+        </div>
       </div>
     </Layout>
   );

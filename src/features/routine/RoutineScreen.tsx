@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { colors } from '../../theme/colors';
 import { Task } from '../../types';
-import { saveToStorage, loadFromStorage, STORAGE_KEYS } from '../../lib/storage';
+import { saveToStorage, loadFromStorage, STORAGE_KEYS } from '../../utils/storage';
+import { CheckCircle2, Circle, Clock, Plus, Trash2 } from 'lucide-react';
 
 const INITIAL_TASKS: Task[] = [
-  { id: '1', title: 'Tomar café', status: 'AGORA' },
-  { id: '2', title: 'Escovar dentes', status: 'AGORA' },
+  { id: '1', title: 'Tomar café da manhã', status: 'DEPOIS' },
+  { id: '2', title: 'Escovar os dentes', status: 'DEPOIS' },
   { id: '3', title: 'Trabalho / Estudo', status: 'DEPOIS' },
   { id: '4', title: 'Almoço', status: 'DEPOIS' },
 ];
@@ -19,7 +20,7 @@ export default function RoutineScreen() {
 
   useEffect(() => {
     const saved = loadFromStorage(STORAGE_KEYS.TASKS);
-    if (saved) {
+    if (saved && Array.isArray(saved)) {
       setTasks(saved);
     } else {
       setTasks(INITIAL_TASKS);
@@ -27,9 +28,7 @@ export default function RoutineScreen() {
   }, []);
 
   useEffect(() => {
-    if (tasks.length > 0) {
-      saveToStorage(STORAGE_KEYS.TASKS, tasks);
-    }
+    saveToStorage(STORAGE_KEYS.TASKS, tasks);
   }, [tasks]);
 
   const addTask = () => {
@@ -37,86 +36,106 @@ export default function RoutineScreen() {
     const newTask: Task = {
       id: Date.now().toString(),
       title: newTaskTitle,
-      status: 'AGORA'
+      status: 'DEPOIS'
     };
     setTasks(prev => [...prev, newTask]);
     setNewTaskTitle('');
   };
 
-  const moveTask = (id: string, newStatus: Task['status']) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
-  };
-
-  const deleteTask = (id: string) => {
+  const deleteTask = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     setTasks(prev => prev.filter(t => t.id !== id));
   };
 
-  const sections: Task['status'][] = ['AGORA', 'DEPOIS', 'CONCLUÍDO'];
+  const toggleStatus = (id: string) => {
+    setTasks(prev => prev.map(t => {
+      if (t.id !== id) return t;
+      let nextStatus: Task['status'] = 'DEPOIS';
+      if (t.status === 'DEPOIS') nextStatus = 'AGORA';
+      else if (t.status === 'AGORA') nextStatus = 'CONCLUÍDO';
+      else nextStatus = 'DEPOIS';
+      return { ...t, status: nextStatus };
+    }));
+  };
+
+  const renderSection = (status: Task['status'], title: string) => {
+    const sectionTasks = tasks.filter(t => t.status === status);
+    if (sectionTasks.length === 0 && status !== 'DEPOIS') return null;
+
+    return (
+      <div className="space-y-4">
+        <h3 className="text-sm font-bold uppercase tracking-widest text-[#7F8C8D] px-2">
+          {title} ({sectionTasks.length})
+        </h3>
+        <div className="space-y-3">
+          {sectionTasks.map((task) => (
+            <div
+              key={task.id}
+              onClick={() => toggleStatus(task.id)}
+              className="w-full bg-white p-5 rounded-[24px] card-shadow flex items-center space-x-4 text-left active:scale-[0.99] transition-all border border-transparent hover:border-[#EBF0F5] group"
+            >
+              <div className="flex-shrink-0">
+                {task.status === 'CONCLUÍDO' ? (
+                  <CheckCircle2 className="w-6 h-6 text-[#82E0AA]" />
+                ) : task.status === 'AGORA' ? (
+                  <Clock className="w-6 h-6 text-[#5DADE2]" />
+                ) : (
+                  <Circle className="w-6 h-6 text-[#BDC3C7]" />
+                )}
+              </div>
+              <div className="flex-1">
+                <span className={`text-lg font-medium ${task.status === 'CONCLUÍDO' ? 'text-[#BDC3C7] line-through' : 'text-[#2C3E50]'}`}>
+                  {task.title}
+                </span>
+              </div>
+              <button 
+                onClick={(e) => deleteTask(task.id, e)}
+                className="p-2 text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            </div>
+          ))}
+          {status === 'DEPOIS' && sectionTasks.length === 0 && (
+            <p className="text-center py-8 text-[#7F8C8D] italic">Nenhuma tarefa pendente.</p>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <Layout title="Rotina" onBack={() => navigate('/')}>
-      <div className="space-y-8 py-4">
-        <div className="flex space-x-2 bg-white p-2 rounded-2xl border-2 border-gray-100 shadow-sm">
-          <input 
-            className="flex-1 p-4 outline-none text-lg"
-            placeholder="Nova tarefa..."
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addTask()}
-          />
-          <button 
-            onClick={addTask}
-            className="px-6 bg-gray-800 text-white rounded-xl font-bold active:opacity-90"
-          >
-            Adicionar
-          </button>
+      <div className="space-y-10 py-4 pb-32">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-bold text-[#2C3E50]">Meu Dia</h2>
+          <p className="text-[#7F8C8D]">Organize suas atividades com calma.</p>
         </div>
 
-        {sections.map(section => (
-          <div key={section} className="space-y-3">
-            <h3 className={`text-xs font-bold tracking-widest uppercase px-2 ${section === 'AGORA' ? 'text-red-500' : section === 'DEPOIS' ? 'text-orange-500' : 'text-green-600'}`}>
-              {section}
-            </h3>
-            <div className="space-y-2">
-              {tasks.filter(t => t.status === section).map(task => (
-                <div key={task.id} className="bg-white p-5 rounded-2xl border-2 border-gray-100 flex items-center justify-between shadow-sm">
-                  <span className={`text-lg font-medium flex-1 pr-4 ${section === 'CONCLUÍDO' ? 'line-through text-gray-300' : 'text-gray-800'}`}>
-                    {task.title}
-                  </span>
-                  <div className="flex space-x-2">
-                    {section !== 'CONCLUÍDO' ? (
-                      <button 
-                        onClick={() => moveTask(task.id, section === 'AGORA' ? 'DEPOIS' : 'CONCLUÍDO')} 
-                        className="px-4 py-2 bg-gray-100 rounded-xl text-sm font-bold active:bg-gray-200"
-                      >
-                        {section === 'AGORA' ? 'Depois' : 'Pronto'}
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={() => moveTask(task.id, 'AGORA')} 
-                        className="px-4 py-2 bg-gray-100 rounded-xl text-sm font-bold active:bg-gray-200"
-                      >
-                        Refazer
-                      </button>
-                    )}
-                    <button 
-                      onClick={() => deleteTask(task.id)} 
-                      className="p-2 text-gray-300 hover:text-red-500 transition-colors"
-                      aria-label="Excluir"
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {tasks.filter(t => t.status === section).length === 0 && (
-                <p className="text-xs text-gray-400 italic py-2 px-2">Nenhuma tarefa aqui</p>
-              )}
-            </div>
+        <div className="space-y-10">
+          {renderSection('AGORA', 'Fazendo agora')}
+          {renderSection('DEPOIS', 'Próximas tarefas')}
+          {renderSection('CONCLUÍDO', 'Concluídas')}
+        </div>
+
+        <div className="fixed bottom-24 left-4 right-4 max-w-md mx-auto">
+          <div className="bg-white p-3 rounded-[32px] card-shadow flex items-center space-x-3 border border-gray-100">
+            <input 
+              className="flex-1 px-4 py-2 outline-none text-lg text-[#2C3E50]"
+              placeholder="Nova tarefa..."
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addTask()}
+            />
+            <button 
+              onClick={addTask}
+              className="p-4 rounded-[24px] text-white active:scale-90 transition-transform shadow-lg shadow-[#5DADE230]"
+              style={{ backgroundColor: colors.primary }}
+            >
+              <Plus className="w-6 h-6" />
+            </button>
           </div>
-        ))}
+        </div>
       </div>
     </Layout>
   );

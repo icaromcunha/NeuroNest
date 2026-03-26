@@ -5,31 +5,32 @@ interface LayoutProps {
   children: ReactNode;
   title?: string;
   onBack?: () => void;
+  hideHeader?: boolean;
 }
 
-export default function Layout({ children, title, onBack }: LayoutProps) {
+export default function Layout({ children, title, onBack, hideHeader = false }: LayoutProps) {
   return (
     <div 
-      className="min-h-screen flex flex-col mx-auto w-full max-w-md shadow-xl relative"
-      style={{ backgroundColor: colors.background, color: colors.text, fontFamily: 'sans-serif' }}
+      className="min-h-screen flex flex-col mx-auto w-full max-w-md relative soft-transition"
+      style={{ backgroundColor: colors.background, color: colors.textPrimary }}
     >
-      {title && (
-        <header className="p-6 flex items-center border-b border-gray-200 bg-white sticky top-0 z-10">
+      {!hideHeader && title && (
+        <header className="p-6 flex items-center bg-white sticky top-0 z-10 border-b border-gray-100">
           {onBack && (
             <button 
               onClick={onBack}
-              className="mr-4 p-3 rounded-full hover:bg-gray-100 transition-colors"
+              className="mr-4 p-3 rounded-2xl hover:bg-gray-50 transition-colors text-gray-400"
               aria-label="Voltar"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m15 18-6-6 6-6"/>
               </svg>
             </button>
           )}
-          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+          <h1 className="text-xl font-bold tracking-tight text-[#2C3E50]">{title}</h1>
         </header>
       )}
-      <main className="flex-1 p-6 overflow-y-auto pb-20">
+      <main className={`flex-1 p-6 overflow-y-auto ${hideHeader ? '' : 'pb-24'}`}>
         <div className="w-full">
           {children}
         </div>

@@ -1,12 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Quicksand", "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
   body {
-    @apply bg-gray-100 antialiased;
+    @apply antialiased;
+    background-color: #F7F9FB;
+    color: #2C3E50;
     font-family: var(--font-sans);
   }
 }
@@ -15,4 +17,12 @@
 ::-webkit-scrollbar {
   width: 0px;
   background: transparent;
+}
+
+.card-shadow {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.soft-transition {
+  transition: all 0.3s ease-in-out;
 }
