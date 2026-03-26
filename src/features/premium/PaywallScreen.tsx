@@ -26,41 +26,41 @@ const PaywallScreen: React.FC = () => {
       title="Premium" 
       onBack={() => navigate('/')}
     >
-      <div className="flex flex-col items-center text-center py-10 space-y-10">
+      <div className="flex flex-col items-center text-center py-10 space-y-12">
         <div 
-          className="w-20 h-20 rounded-2xl flex items-center justify-center"
+          className="w-24 h-24 rounded-3xl flex items-center justify-center shadow-sm"
           style={{ backgroundColor: colors.primary + '10' }}
         >
-          <Star size={32} color={colors.primary} />
+          <Star size={40} color={colors.primary} />
         </div>
 
-        <div className="space-y-2">
-          <h2 className="text-2xl font-medium text-[#1F2937]">
+        <div className="space-y-3">
+          <h2 className="text-2xl font-medium text-[#1F2937] tracking-tight">
             Desbloqueie o NeuroCalm Pro
           </h2>
-          <p className="text-sm text-[#6B7280]">
+          <p className="text-sm text-[#6B7280] max-w-[240px] mx-auto">
             Tenha acesso a todas as ferramentas para o seu bem-estar.
           </p>
         </div>
 
-        <div className="w-full space-y-5 text-left bg-white p-6 rounded-xl card-shadow border border-gray-50">
+        <div className="w-full space-y-6 text-left bg-white p-8 rounded-2xl card-shadow border border-gray-50">
           {benefits.map((benefit, index) => (
             <div 
               key={index}
-              className="flex items-start space-x-3"
+              className="flex items-start space-x-4"
             >
-              <div className="mt-0.5">
-                <Check size={16} color={colors.primary} />
+              <div className="mt-1 p-1 rounded-full bg-[#4A90E2]10">
+                <Check size={12} color={colors.primary} strokeWidth={3} />
               </div>
-              <span className="text-sm text-[#1F2937] leading-relaxed">{benefit}</span>
+              <span className="text-sm font-medium text-[#4B5563] leading-relaxed">{benefit}</span>
             </div>
           ))}
         </div>
 
-        <div className="w-full pt-4 space-y-4">
+        <div className="w-full pt-4 space-y-5">
           <button
             onClick={handleUnlock}
-            className="w-full py-4 rounded-xl font-medium text-base shadow-sm"
+            className="w-full py-4 rounded-xl font-bold text-base shadow-lg active:scale-95 transition-all uppercase tracking-wider"
             style={{ 
               backgroundColor: colors.primary,
               color: 'white'
@@ -69,8 +69,8 @@ const PaywallScreen: React.FC = () => {
             Desbloquear Agora
           </button>
           
-          <p className="text-xs text-[#6B7280]">
-            Pagamento único. Acesso vitalício.
+          <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-widest">
+            Pagamento único • Acesso vitalício
           </p>
         </div>
       </div>

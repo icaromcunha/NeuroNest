@@ -65,14 +65,14 @@ export default function HomeScreen() {
           <div className="pt-2">
             <button
               onClick={() => navigate('/paywall')}
-              className="w-full p-5 bg-white border border-[#E5E7EB] rounded-xl flex items-center justify-between card-shadow"
+              className="w-full p-6 bg-white border border-transparent rounded-2xl flex items-center justify-between card-shadow hover:border-gray-100 transition-all"
             >
-              <div className="flex items-center space-x-4">
-                <div className="bg-[#4A90E2]10 p-2.5 rounded-lg">
-                  <Sparkles className="w-5 h-5 text-[#4A90E2]" />
+              <div className="flex items-center space-x-5">
+                <div className="bg-[#4A90E2]10 p-3 rounded-xl flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-[#4A90E2]" />
                 </div>
                 <div className="text-left">
-                  <p className="font-medium text-[#1F2937]">Desbloquear completo</p>
+                  <p className="text-base font-medium text-[#1F2937]">Desbloquear completo</p>
                   <p className="text-xs text-[#6B7280]">Todas as ferramentas</p>
                 </div>
               </div>

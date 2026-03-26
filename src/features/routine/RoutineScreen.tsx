@@ -74,24 +74,24 @@ export default function RoutineScreen() {
             <div
               key={task.id}
               onClick={() => toggleStatus(task.id)}
-              className="relative flex items-center space-x-6 group"
+              className="relative flex items-center space-x-6 group cursor-pointer"
             >
-              <div className="relative z-10 flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-full bg-white card-shadow border border-gray-50">
+              <div className="relative z-10 flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-full bg-white card-shadow border border-gray-50 transition-all">
                 {task.status === 'CONCLUÍDO' ? (
                   <CheckCircle2 className="w-6 h-6 text-[#4A90E2]" />
                 ) : task.status === 'AGORA' ? (
-                  <div className="w-3 h-3 rounded-full bg-[#4A90E2]" />
+                  <div className="w-4 h-4 rounded-full bg-[#4A90E2] animate-pulse" />
                 ) : (
                   <div className="w-3 h-3 rounded-full bg-gray-200" />
                 )}
               </div>
               
-              <div className={`flex-1 p-5 rounded-xl bg-white card-shadow border border-transparent flex items-center justify-between ${task.status === 'AGORA' ? 'border-[#4A90E2]10' : ''}`}>
+              <div className={`flex-1 p-6 rounded-xl bg-white card-shadow border border-transparent flex items-center justify-between transition-all ${task.status === 'AGORA' ? 'border-[#4A90E2]20 ring-1 ring-[#4A90E2]10' : 'hover:border-gray-100'}`}>
                 <div className="flex flex-col">
-                  <span className={`text-base font-medium ${task.status === 'CONCLUÍDO' ? 'text-[#6B7280] line-through' : 'text-[#1F2937]'}`}>
+                  <span className={`text-base font-medium ${task.status === 'CONCLUÍDO' ? 'text-[#9CA3AF] line-through' : 'text-[#1F2937]'}`}>
                     {task.title}
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#6B7280] mt-1">
+                  <span className={`text-[10px] font-bold uppercase tracking-wider mt-1.5 ${task.status === 'AGORA' ? 'text-[#4A90E2]' : 'text-[#6B7280]'}`}>
                     {task.status === 'AGORA' ? 'Fazendo agora' : task.status === 'CONCLUÍDO' ? 'Concluído' : 'Próximo'}
                   </span>
                 </div>
@@ -107,14 +107,16 @@ export default function RoutineScreen() {
           ))}
 
           {tasks.length === 0 && (
-            <p className="text-center py-12 text-[#6B7280] italic text-sm">Nenhuma tarefa na rotina.</p>
+            <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
+              <p className="text-[#6B7280] italic text-sm">Nenhuma tarefa na rotina.</p>
+            </div>
           )}
         </div>
 
         <div className="fixed bottom-24 left-6 right-6 max-w-md mx-auto">
-          <div className="bg-white p-2 rounded-xl card-shadow flex items-center space-x-2 border border-gray-100">
+          <div className="bg-white p-2 rounded-2xl card-shadow flex items-center space-x-2 border border-gray-100">
             <input 
-              className="flex-1 px-4 py-3 outline-none text-sm text-[#1F2937]"
+              className="flex-1 px-4 py-3 outline-none text-sm text-[#1F2937] bg-transparent"
               placeholder="Nova tarefa..."
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
@@ -122,7 +124,7 @@ export default function RoutineScreen() {
             />
             <button 
               onClick={addTask}
-              className="p-3 rounded-lg text-white active:scale-90 transition-transform shadow-sm"
+              className="p-3.5 rounded-xl text-white shadow-sm transition-all"
               style={{ backgroundColor: colors.primary }}
             >
               <Plus className="w-5 h-5" />

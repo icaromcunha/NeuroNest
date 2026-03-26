@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { colors } from '../../theme/colors';
+import { Wind, Zap, AlertCircle } from 'lucide-react';
 
 export default function PauseScreen() {
   const navigate = useNavigate();
@@ -9,21 +10,21 @@ export default function PauseScreen() {
     { 
       label: 'Leve desconforto', 
       state: 'leve', 
-      icon: '🟡',
+      icon: <Wind className="w-6 h-6" />,
       color: '#FBBF24',
       desc: 'Sinto que preciso de um pequeno respiro'
     },
     { 
       label: 'Sobrecarga', 
       state: 'sobrecarga', 
-      icon: '🟠',
+      icon: <Zap className="w-6 h-6" />,
       color: '#F59E0B',
       desc: 'Muitos estímulos, preciso me acalmar'
     },
     { 
       label: 'Crise', 
       state: 'crise', 
-      icon: '🔴',
+      icon: <AlertCircle className="w-6 h-6" />,
       color: '#EF4444',
       desc: 'Preciso de ajuda imediata para regular'
     },
@@ -42,10 +43,11 @@ export default function PauseScreen() {
             <button
               key={opt.state}
               onClick={() => navigate(`/pause/${opt.state}`)}
-              className="w-full p-6 rounded-xl bg-white card-shadow flex items-center text-left space-x-5 border border-transparent"
+              className="w-full p-6 rounded-xl bg-white card-shadow flex items-center text-left space-x-5 border border-transparent hover:border-gray-100 transition-all"
             >
               <div 
-                className="text-3xl w-14 h-14 flex items-center justify-center rounded-xl bg-gray-50"
+                className="p-3.5 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: `${opt.color}15`, color: opt.color }}
               >
                 {opt.icon}
               </div>
@@ -57,7 +59,7 @@ export default function PauseScreen() {
           ))}
         </div>
 
-        <div className="mt-8 p-8 rounded-xl bg-white card-shadow text-center">
+        <div className="mt-8 p-8 rounded-xl bg-white card-shadow text-center border border-gray-50">
           <p className="text-sm text-[#6B7280] italic leading-relaxed">"Tudo bem ir devagar. Você está seguro aqui."</p>
         </div>
       </div>
