@@ -1,98 +1,57 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../../components/Layout';
-import { colors } from '../../theme/colors';
-import { PauseCircle, MessageCircle, Calendar, BookOpen, Sparkles } from 'lucide-react';
-import { isUserPremium } from '../../utils/premium';
+import { motion } from 'framer-motion';
+import { PauseCircle, MessageCircle, Calendar, Settings } from 'lucide-react';
 
-export default function HomeScreen() {
+export const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
-  const isPremium = isUserPremium();
 
-  const mainActions = [
-    { 
-      label: 'Pausa rápida', 
-      description: 'Respire e acalme-se',
-      path: '/pause', 
-      color: colors.primary,
-      icon: <PauseCircle className="w-6 h-6" />
-    },
-    { 
-      label: 'Me expressar', 
-      description: 'Diga o que você precisa',
-      path: '/communicate', 
-      color: colors.secondary,
-      icon: <MessageCircle className="w-6 h-6" />
-    },
-    { 
-      label: 'Meu dia', 
-      description: 'Veja o que vem agora',
-      path: '/routine', 
-      color: colors.primary,
-      icon: <Calendar className="w-6 h-6" />
-    },
+  const actions = [
+    { label: 'Pausar', icon: <PauseCircle className="w-8 h-8 text-[#4A90E2]" />, path: '/pause' },
+    { label: 'Comunicar', icon: <MessageCircle className="w-8 h-8 text-[#6FAFE7]" />, path: '/communicate' },
+    { label: 'Rotina', icon: <Calendar className="w-8 h-8 text-[#4A90E2]" />, path: '/routine' }
   ];
 
   return (
-    <Layout>
-      <div className="py-4 space-y-10">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-medium text-[#1F2937]">Olá,</h1>
-          <p className="text-lg text-[#6B7280]">Vamos ter um dia calmo hoje?</p>
-        </div>
-
-        <div className="grid gap-5">
-          {mainActions.map((action) => (
-            <button
-              key={action.label}
-              onClick={() => navigate(action.path)}
-              className="interactive-card"
-            >
-              <div 
-                className="p-3.5 rounded-xl"
-                style={{ backgroundColor: `${action.color}10`, color: action.color }}
-              >
-                {action.icon}
-              </div>
-              <div className="flex-1">
-                <h2 className="text-lg font-medium text-[#1F2937]">{action.label}</h2>
-                <p className="text-sm text-[#6B7280]">{action.description}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {!isPremium && (
-          <div className="pt-2">
-            <button
-              onClick={() => navigate('/paywall')}
-              className="interactive-card"
-            >
-              <div className="flex items-center space-x-5">
-                <div className="bg-[#4A90E2]10 p-3 rounded-xl flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-[#4A90E2]" />
-                </div>
-                <div className="text-left">
-                  <p className="text-base font-medium text-[#1F2937]">Desbloquear completo</p>
-                  <p className="text-xs text-[#6B7280]">Todas as ferramentas</p>
-                </div>
-              </div>
-              <div className="bg-[#4A90E2] text-white px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider">
-                PRO
-              </div>
-            </button>
-          </div>
-        )}
-
-        <div className="pt-4 flex justify-center">
-          <button
-            onClick={() => navigate('/library')}
-            className="btn-ghost"
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>Biblioteca de Ferramentas</span>
-          </button>
-        </div>
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col p-8 pt-12">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-12">
+        <div className="w-12 h-12" /> {/* Spacer */}
+        <h1 className="text-4xl font-bold tracking-tight">
+          <span className="text-[#1F2937]">Neuro</span>
+          <span className="text-[#4A90E2]">C</span>
+          <span className="text-[#6FAFE7]">a</span>
+          <span className="text-[#1F2937]">lm</span>
+        </h1>
+        <button
+          onClick={() => navigate('/settings')}
+          className="p-3 rounded-full bg-white shadow-sm text-[#6B7280] active:scale-95 transition-transform"
+        >
+          <Settings className="w-6 h-6" />
+        </button>
       </div>
-    </Layout>
+
+      <div className="flex-1 flex flex-col space-y-6">
+        {actions.map((action, index) => (
+          <motion.button
+            key={action.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            onClick={() => navigate(action.path)}
+            className="w-full p-8 bg-white rounded-3xl shadow-sm border border-[#E5E7EB] flex items-center space-x-8 active:scale-95 transition-transform"
+          >
+            <div className="p-4 rounded-2xl bg-[#F8FAFC]">
+              {action.icon}
+            </div>
+            <span className="text-2xl font-medium text-[#1F2937]">{action.label}</span>
+          </motion.button>
+        ))}
+      </div>
+
+      <div className="mt-auto text-center py-8">
+        <p className="text-[#6B7280] text-lg font-medium italic">"Tudo bem ir devagar. Você está seguro aqui."</p>
+      </div>
+    </div>
   );
-}
+};

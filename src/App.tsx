@@ -1,27 +1,39 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ToastProvider } from './components/Toast';
-import HomeScreen from './features/home/HomeScreen';
-import PauseScreen from './features/pause/PauseScreen';
-import PauseDetailScreen from './features/pause/PauseDetailScreen';
-import CommunicateScreen from './features/communicate/CommunicateScreen';
-import RoutineScreen from './features/routine/RoutineScreen';
-import LibraryScreen from './features/library/LibraryScreen';
-import PaywallScreen from './features/premium/PaywallScreen';
+import { TimerProvider } from './hooks/useSingleTimer';
+import { ProtocolProvider } from './hooks/useProtocol';
+import { SettingsProvider } from './hooks/useSettings';
+import { DataProvider } from './hooks/useData';
+import { HomeScreen } from './features/home/HomeScreen';
+import { PauseSelectionScreen } from './features/pause/PauseSelectionScreen';
+import { PauseDetailScreen } from './features/pause/PauseDetailScreen';
+import { CommunicateScreen } from './features/communicate/CommunicateScreen';
+import { CommunicateEditScreen } from './features/communicate/CommunicateEditScreen';
+import { RoutineScreen } from './features/routine/RoutineScreen';
+import { RoutineEditScreen } from './features/routine/RoutineEditScreen';
+import { SettingsScreen } from './features/settings/SettingsScreen';
 
 export default function App() {
   return (
-    <ToastProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<HomeScreen />} />
-          <Route path="/pause" element={<PauseScreen />} />
-          <Route path="/pause/:state" element={<PauseDetailScreen />} />
-          <Route path="/communicate" element={<CommunicateScreen />} />
-          <Route path="/routine" element={<RoutineScreen />} />
-          <Route path="/library" element={<LibraryScreen />} />
-          <Route path="/paywall" element={<PaywallScreen />} />
-        </Routes>
-      </Router>
-    </ToastProvider>
+    <SettingsProvider>
+      <DataProvider>
+        <TimerProvider>
+          <ProtocolProvider>
+            <Router>
+              <Routes>
+                <Route path="/" element={<HomeScreen />} />
+                <Route path="/pause" element={<PauseSelectionScreen />} />
+                <Route path="/pause/detail" element={<PauseDetailScreen />} />
+                <Route path="/communicate" element={<CommunicateScreen />} />
+                <Route path="/communicate/edit" element={<CommunicateEditScreen />} />
+                <Route path="/routine" element={<RoutineScreen />} />
+                <Route path="/routine/edit" element={<RoutineEditScreen />} />
+                <Route path="/settings" element={<SettingsScreen />} />
+              </Routes>
+            </Router>
+          </ProtocolProvider>
+        </TimerProvider>
+      </DataProvider>
+    </SettingsProvider>
   );
 }
