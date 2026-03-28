@@ -45,7 +45,7 @@ export default function HomeScreen() {
             <button
               key={action.label}
               onClick={() => navigate(action.path)}
-              className="w-full p-6 rounded-xl bg-white card-shadow flex items-center text-left space-x-5 border border-transparent hover:border-gray-100"
+              className="interactive-card"
             >
               <div 
                 className="p-3.5 rounded-xl"
@@ -65,7 +65,7 @@ export default function HomeScreen() {
           <div className="pt-2">
             <button
               onClick={() => navigate('/paywall')}
-              className="w-full p-6 bg-white border border-transparent rounded-2xl flex items-center justify-between card-shadow hover:border-gray-100 transition-all"
+              className="interactive-card"
             >
               <div className="flex items-center space-x-5">
                 <div className="bg-[#4A90E2]10 p-3 rounded-xl flex items-center justify-center">
@@ -86,7 +86,7 @@ export default function HomeScreen() {
         <div className="pt-4 flex justify-center">
           <button
             onClick={() => navigate('/library')}
-            className="px-6 py-3 text-[#6B7280] text-sm font-medium flex items-center space-x-2 hover:bg-gray-50 rounded-full transition-colors"
+            className="btn-ghost"
           >
             <BookOpen className="w-4 h-4" />
             <span>Biblioteca de Ferramentas</span>

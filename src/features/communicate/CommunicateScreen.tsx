@@ -121,7 +121,7 @@ export default function CommunicateScreen() {
   const [newLabel, setNewLabel] = useState('');
   const [newText, setNewText] = useState('');
   const [newIcon, setNewIcon] = useState('Volume2');
-  const [voiceType, setVoiceType] = useState<'male' | 'female' | 'neutral'>('female');
+  const [voiceType, setVoiceType] = useState<'male' | 'female'>('female');
 
   useEffect(() => {
     const loadVoices = () => {
@@ -175,42 +175,46 @@ export default function CommunicateScreen() {
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'pt-BR';
-    utterance.rate = 0.85; // Slightly slower for better clarity
-    utterance.pitch = 1.0;
+    utterance.rate = 0.9; 
+    utterance.pitch = voiceType === 'female' ? 1.05 : 0.95;
     utterance.volume = 1.0;
     
     const voices = window.speechSynthesis.getVoices();
-    // Filter for Portuguese voices
-    const ptVoices = voices.filter(v => v.lang.includes('pt'));
+    const ptVoices = voices.filter(v => v.lang.includes('pt-BR'));
     
     let selectedVoice = null;
     
     if (voiceType === 'male') {
-      // Try to find a good male voice
+      // Prioritize natural sounding male voices
       selectedVoice = ptVoices.find(v => 
-        (v.name.toLowerCase().includes('male') || 
-         v.name.toLowerCase().includes('daniel') || 
-         v.name.toLowerCase().includes('antonio') ||
-         v.name.toLowerCase().includes('helio')) &&
-        !v.name.toLowerCase().includes('google') // Sometimes system voices are better, but let's try
-      ) || ptVoices.find(v => v.name.toLowerCase().includes('male'));
-    } else if (voiceType === 'female') {
-      // Try to find a good female voice, preferring Google voices which are usually higher quality
-      selectedVoice = ptVoices.find(v => 
-        v.name.toLowerCase().includes('google português do brasil')
+        v.name.toLowerCase().includes('google') && 
+        (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('daniel') || v.name.toLowerCase().includes('antonio'))
       ) || ptVoices.find(v => 
-        v.name.toLowerCase().includes('female') || 
-        v.name.toLowerCase().includes('maria') || 
-        v.name.toLowerCase().includes('luciana') ||
-        v.name.toLowerCase().includes('victoria')
+        v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('daniel') || v.name.toLowerCase().includes('antonio')
       );
     } else {
-      // Neutral - just take a high quality one
-      selectedVoice = ptVoices.find(v => v.name.toLowerCase().includes('google')) || ptVoices[0];
+      // Prioritize natural sounding female voices
+      selectedVoice = ptVoices.find(v => 
+        v.name.toLowerCase().includes('google') && 
+        (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('maria') || v.name.toLowerCase().includes('luciana'))
+      ) || ptVoices.find(v => 
+        v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('maria') || v.name.toLowerCase().includes('luciana')
+      );
     }
     
     if (!selectedVoice && ptVoices.length > 0) {
       selectedVoice = ptVoices[0];
+    }
+    
+    // Fallback to any pt voice if no pt-BR
+    if (!selectedVoice) {
+      const anyPt = voices.filter(v => v.lang.includes('pt'));
+      selectedVoice = anyPt[0];
+    }
+
+    // Final fallback
+    if (!selectedVoice) {
+      selectedVoice = voices[0];
     }
     
     if (selectedVoice) {
@@ -291,7 +295,7 @@ export default function CommunicateScreen() {
             key={name}
             type="button"
             onClick={(e) => { e.stopPropagation(); onSelect(name); }}
-            className={`aspect-square rounded-xl flex items-center justify-center transition-all shadow-sm ${selected === name ? 'bg-[#4A90E2] text-white scale-105' : 'bg-white text-[#4B5563] hover:bg-gray-100'}`}
+            className={`aspect-square rounded-xl flex items-center justify-center transition-all card-shadow ${selected === name ? 'bg-[#4A90E2] text-white scale-105' : 'bg-white text-[#4B5563] hover:bg-gray-100'}`}
           >
             <IconRenderer name={name} className="w-5 h-5" />
           </button>
@@ -322,21 +326,15 @@ export default function CommunicateScreen() {
           <div className="flex p-1.5 bg-gray-50 rounded-xl">
             <button 
               onClick={() => setVoiceType('male')}
-              className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all ${voiceType === 'male' ? 'bg-white shadow-sm text-[#4A90E2]' : 'text-gray-400'}`}
+              className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all ${voiceType === 'male' ? 'bg-white card-shadow text-[#4A90E2]' : 'text-gray-400'}`}
             >
               MASCULINA
             </button>
             <button 
               onClick={() => setVoiceType('female')}
-              className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all ${voiceType === 'female' ? 'bg-white shadow-sm text-[#4A90E2]' : 'text-gray-400'}`}
+              className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all ${voiceType === 'female' ? 'bg-white card-shadow text-[#4A90E2]' : 'text-gray-400'}`}
             >
               FEMININA
-            </button>
-            <button 
-              onClick={() => setVoiceType('neutral')}
-              className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all ${voiceType === 'neutral' ? 'bg-white shadow-sm text-[#4A90E2]' : 'text-gray-400'}`}
-            >
-              NEUTRA
             </button>
           </div>
         </div>
@@ -345,55 +343,90 @@ export default function CommunicateScreen() {
           {quickActions.map((action) => (
             <div key={action.id} className="relative group">
               <button
-                onClick={() => editingId !== action.id && handleSpeak(action.text)}
-                className={`w-full p-6 rounded-2xl bg-white card-shadow flex flex-col items-center text-center space-y-4 border transition-all ${editingId === action.id ? 'border-[#4A90E2] ring-1 ring-[#4A90E2]10' : 'border-transparent hover:border-gray-100'}`}
+                onClick={() => handleSpeak(action.text)}
+                className="w-full p-6 rounded-2xl bg-white card-shadow flex flex-col items-center text-center space-y-4 border border-transparent hover:border-gray-100 transition-all"
               >
-                {editingId === action.id ? (
-                  <div className="w-full space-y-6">
-                    <div className="space-y-2">
-                      <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest ml-1 text-left">Texto do botão</p>
-                      <input 
-                        className="w-full p-3 bg-gray-50 rounded-xl outline-none font-medium text-sm text-[#1F2937] border border-transparent focus:border-[#4A90E2]20 transition-all"
-                        value={newLabel}
-                        onChange={(e) => setNewLabel(e.target.value)}
-                        autoFocus
-                      />
-                    </div>
-                    <IconSelector selected={newIcon} onSelect={setNewIcon} />
-                    <div className="flex space-x-2 pt-2">
-                      <button onClick={saveEdit} className="flex-1 py-3 bg-[#4A90E2] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md active:scale-95 transition-all">Salvar</button>
-                      <button onClick={() => { resetForm(); setIsEditingQuick(false); }} className="flex-1 py-3 bg-gray-100 text-[#6B7280] rounded-xl text-xs font-bold uppercase tracking-wider active:scale-95 transition-all">Sair</button>
-                    </div>
+                <div 
+                  className="p-3.5 rounded-xl flex items-center justify-center relative"
+                  style={{ backgroundColor: `${action.color}10`, color: action.color }}
+                >
+                  <IconRenderer name={action.iconName} className="w-6 h-6" />
+                  <div className="absolute -right-1 -top-1 bg-white rounded-full p-0.5 card-shadow opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Volume2 className="w-3 h-3 text-[#4A90E2]" />
                   </div>
-                ) : (
-                  <>
-                    <div 
-                      className="p-3.5 rounded-xl flex items-center justify-center relative"
-                      style={{ backgroundColor: `${action.color}10`, color: action.color }}
-                    >
-                      <IconRenderer name={action.iconName} className="w-6 h-6" />
-                      <div className="absolute -right-1 -top-1 bg-white rounded-full p-0.5 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Volume2 className="w-3 h-3 text-[#4A90E2]" />
-                      </div>
-                    </div>
-                    <span className="text-sm font-medium text-[#1F2937] leading-tight">{action.label}</span>
-                    
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsEditingQuick(true);
-                        startEditing(action, e);
-                      }}
-                      className="absolute top-3 right-3 p-1.5 bg-gray-50 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-gray-100"
-                    >
-                      <Edit2 className="w-3.5 h-3.5 text-gray-400" />
-                    </button>
-                  </>
-                )}
+                </div>
+                <span className="text-sm font-medium text-[#1F2937] leading-tight">{action.label}</span>
+                
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditingQuick(true);
+                    startEditing(action, e);
+                  }}
+                  className="absolute top-3 right-3 p-1.5 bg-gray-50 rounded-full text-gray-400 hover:bg-gray-100 transition-all"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                </button>
               </button>
             </div>
           ))}
         </div>
+
+        {/* Edit Modal for Quick Actions and Phrases */}
+        {(editingId || isAdding) && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
+            <div className="bg-white w-full max-w-md rounded-3xl card-shadow overflow-hidden animate-in slide-in-from-bottom duration-300">
+              <div className="p-6 border-b border-gray-50 flex items-center justify-between">
+                <h3 className="text-lg font-bold text-[#1F2937]">
+                  {isAdding ? 'Nova Frase' : 'Editar Frase'}
+                </h3>
+                <button onClick={resetForm} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest ml-1">Nome do botão</label>
+                  <input 
+                    className="w-full p-4 bg-gray-50 rounded-2xl outline-none font-medium text-sm text-[#1F2937] border border-transparent focus:border-[#4A90E2]20 transition-all"
+                    placeholder="Ex: Quero água"
+                    value={newLabel}
+                    onChange={(e) => setNewLabel(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest ml-1">O que o app vai falar</label>
+                  <textarea 
+                    className="w-full p-4 bg-gray-50 rounded-2xl outline-none text-sm text-[#1F2937] border border-transparent focus:border-[#4A90E2]20 transition-all min-h-[100px] resize-none"
+                    placeholder="Frase completa..."
+                    value={newText}
+                    onChange={(e) => setNewText(e.target.value)}
+                  />
+                </div>
+
+                <IconSelector selected={newIcon} onSelect={setNewIcon} />
+              </div>
+
+              <div className="p-6 bg-gray-50 flex space-x-3">
+                <button 
+                  onClick={isAdding ? addPhrase : saveEdit}
+                  className="btn-primary flex-1 py-4"
+                >
+                  Salvar Alterações
+                </button>
+                <button 
+                  onClick={resetForm}
+                  className="btn-secondary px-8 py-4"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-5">
           <h3 className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-[0.2em] ml-1">Minhas frases</h3>
@@ -458,9 +491,9 @@ export default function CommunicateScreen() {
                       </>
                     ) : (
                       <>
-                        <button onClick={(e) => startEditing(phrase, e)} className="p-2 text-gray-300 hover:text-[#4A90E2] hover:bg-blue-50 rounded-full transition-all opacity-0 group-hover:opacity-100"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={(e) => startEditing(phrase, e)} className="p-2 text-gray-300 hover:text-[#4A90E2] hover:bg-blue-50 rounded-full transition-all"><Edit2 className="w-4 h-4" /></button>
                         {!phrase.isLocked && (
-                          <button onClick={(e) => deletePhrase(phrase.id, e)} className="p-2 text-gray-300 hover:text-red-400 hover:bg-red-50 rounded-full transition-all opacity-0 group-hover:opacity-100"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={(e) => deletePhrase(phrase.id, e)} className="p-2 text-gray-300 hover:text-red-400 hover:bg-red-50 rounded-full transition-all"><Trash2 className="w-4 h-4" /></button>
                         )}
                       </>
                     )}
@@ -471,45 +504,7 @@ export default function CommunicateScreen() {
           </div>
         </div>
 
-        {isAdding ? (
-          <div className="bg-white p-8 rounded-2xl card-shadow border border-[#4A90E2]20 space-y-8">
-            <div className="space-y-5">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider ml-1">Nome da frase</label>
-                <input 
-                  className="w-full p-4 bg-gray-50 rounded-xl outline-none font-medium text-sm border border-transparent focus:border-[#4A90E2]20 transition-all"
-                  placeholder="Ex: Quero água"
-                  value={newLabel}
-                  onChange={(e) => setNewLabel(e.target.value)}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider ml-1">O que o app vai falar</label>
-                <input 
-                  className="w-full p-4 bg-gray-50 rounded-xl outline-none text-sm border border-transparent focus:border-[#4A90E2]20 transition-all"
-                  placeholder="Frase completa..."
-                  value={newText}
-                  onChange={(e) => setNewText(e.target.value)}
-                />
-              </div>
-              <IconSelector selected={newIcon} onSelect={setNewIcon} />
-            </div>
-            <div className="flex space-x-3">
-              <button 
-                onClick={addPhrase}
-                className="flex-1 py-4 bg-[#4A90E2] text-white rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg active:scale-95 transition-all"
-              >
-                Salvar
-              </button>
-              <button 
-                onClick={resetForm}
-                className="px-8 py-4 bg-gray-100 text-[#6B7280] rounded-xl font-bold text-sm uppercase tracking-wider active:scale-95 transition-all"
-              >
-                Sair
-              </button>
-            </div>
-          </div>
-        ) : (
+        {isAdding ? null : (
           <button
             onClick={() => setIsAdding(true)}
             className="w-full p-6 border-2 border-dashed border-gray-100 rounded-2xl flex items-center justify-center space-x-3 text-[#9CA3AF] font-bold text-xs uppercase tracking-widest hover:border-gray-200 hover:text-[#6B7280] transition-all"

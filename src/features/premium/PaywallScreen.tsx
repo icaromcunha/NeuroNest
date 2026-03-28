@@ -28,7 +28,7 @@ const PaywallScreen: React.FC = () => {
     >
       <div className="flex flex-col items-center text-center py-10 space-y-12">
         <div 
-          className="w-24 h-24 rounded-3xl flex items-center justify-center shadow-sm"
+          className="w-24 h-24 rounded-3xl flex items-center justify-center card-shadow"
           style={{ backgroundColor: colors.primary + '10' }}
         >
           <Star size={40} color={colors.primary} />
@@ -60,11 +60,7 @@ const PaywallScreen: React.FC = () => {
         <div className="w-full pt-4 space-y-5">
           <button
             onClick={handleUnlock}
-            className="w-full py-4 rounded-xl font-bold text-base shadow-lg active:scale-95 transition-all uppercase tracking-wider"
-            style={{ 
-              backgroundColor: colors.primary,
-              color: 'white'
-            }}
+            className="btn-primary w-full py-5"
           >
             Desbloquear Agora
           </button>

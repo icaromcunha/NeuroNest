@@ -93,7 +93,7 @@ export default function LibraryScreen() {
                 <button
                   key={mod.id}
                   onClick={() => handleModuleClick(mod)}
-                  className="w-full p-6 bg-white rounded-xl card-shadow flex items-center justify-between border border-transparent hover:border-gray-100 transition-all"
+                  className="interactive-card"
                 >
                   <div className="flex items-center space-x-5">
                     <div 
@@ -139,7 +139,7 @@ export default function LibraryScreen() {
                   <button 
                     key={idx} 
                     onClick={() => toggleCheck(itemId)}
-                    className={`w-full p-6 rounded-xl bg-white border flex items-center space-x-5 transition-all card-shadow ${isChecked ? 'border-[#4A90E2]20 bg-[#4A90E2]05' : 'border-transparent hover:border-gray-100'}`}
+                    className={`interactive-card ${isChecked ? 'border-[#4A90E2]20 bg-[#4A90E2]05' : ''}`}
                   >
                     <div className="flex-shrink-0">
                       {isChecked ? (
@@ -159,7 +159,7 @@ export default function LibraryScreen() {
             <div className="pt-4">
               <button 
                 onClick={() => navigate('/')}
-                className="w-full py-4 rounded-xl font-bold text-white shadow-lg active:scale-95 transition-all text-sm uppercase tracking-wider"
+                className="btn-primary w-full py-5"
                 style={{ backgroundColor: selectedModule.color }}
               >
                 Voltar ao Início

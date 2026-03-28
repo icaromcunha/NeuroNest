@@ -86,7 +86,7 @@ export default function RoutineScreen() {
                 )}
               </div>
               
-              <div className={`flex-1 p-6 rounded-xl bg-white card-shadow border border-transparent flex items-center justify-between transition-all ${task.status === 'AGORA' ? 'border-[#4A90E2]20 ring-1 ring-[#4A90E2]10' : 'hover:border-gray-100'}`}>
+              <div className={`flex-1 interactive-card ${task.status === 'AGORA' ? 'border-[#4A90E2]20 ring-1 ring-[#4A90E2]10' : ''}`}>
                 <div className="flex flex-col">
                   <span className={`text-base font-medium ${task.status === 'CONCLUÍDO' ? 'text-[#9CA3AF] line-through' : 'text-[#1F2937]'}`}>
                     {task.title}
@@ -98,7 +98,7 @@ export default function RoutineScreen() {
                 
                 <button 
                   onClick={(e) => deleteTask(task.id, e)}
-                  className="p-2 text-gray-200 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="p-2 text-gray-300 hover:text-red-400 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -124,7 +124,7 @@ export default function RoutineScreen() {
             />
             <button 
               onClick={addTask}
-              className="p-3.5 rounded-xl text-white shadow-sm transition-all"
+              className="p-3.5 rounded-xl text-white card-shadow active:scale-95 transition-all"
               style={{ backgroundColor: colors.primary }}
             >
               <Plus className="w-5 h-5" />
