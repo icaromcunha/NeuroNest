@@ -1,67 +1,35 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
-interface UseTimerProps {
-  initialSeconds: number;
-  onTimeUp?: () => void;
-}
+export const useTimer = (initialSeconds: number, onComplete?: () => void) => {
+  const [seconds, setSeconds] = useState(initialSeconds);
+  const [isActive, setIsActive] = useState(true);
+  const onCompleteRef = useRef(onComplete);
 
-export function useTimer({ initialSeconds, onTimeUp }: UseTimerProps) {
-  const [timeLeft, setTimeLeft] = useState(initialSeconds);
-  const [isRunning, setIsRunning] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const onTimeUpRef = useRef(onTimeUp);
-
-  // Keep onTimeUpRef up to date
   useEffect(() => {
-    onTimeUpRef.current = onTimeUp;
-  }, [onTimeUp]);
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
-  const clearTimer = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isActive && seconds > 0) {
+      interval = setInterval(() => {
+        setSeconds((prev) => prev - 1);
+      }, 1000);
+    } else if (seconds === 0) {
+      setIsActive(false);
+      onCompleteRef.current?.();
     }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isActive, seconds]);
+
+  const pause = useCallback(() => setIsActive(false), []);
+  const resume = useCallback(() => setIsActive(true), []);
+  const reset = useCallback((newSeconds: number) => {
+    setSeconds(newSeconds);
+    setIsActive(true);
   }, []);
 
-  const start = useCallback(() => {
-    if (intervalRef.current) return; // Prevent multiple intervals
-
-    setIsRunning(true);
-    intervalRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearTimer();
-          setIsRunning(false);
-          if (onTimeUpRef.current) onTimeUpRef.current();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, [clearTimer]);
-
-  const pause = useCallback(() => {
-    clearTimer();
-    setIsRunning(false);
-  }, [clearTimer]);
-
-  const reset = useCallback((newSeconds?: number) => {
-    clearTimer();
-    setIsRunning(false);
-    setTimeLeft(newSeconds !== undefined ? newSeconds : initialSeconds);
-  }, [clearTimer, initialSeconds]);
-
-  // Clean up on unmount
-  useEffect(() => {
-    return () => clearTimer();
-  }, [clearTimer]);
-
-  return {
-    timeLeft,
-    isRunning,
-    start,
-    pause,
-    reset,
-    setTimeLeft
-  };
-}
+  return { seconds, isActive, pause, resume, reset };
+};
